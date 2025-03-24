@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Красивый сайт</title>
+    <title>Красивый анимированный фон</title>
     <style>
         * {
             margin: 0;
@@ -13,43 +13,80 @@
         }
 
         body {
-            background: linear-gradient(135deg, rgba(0, 102, 204, 0.2), rgba(0, 51, 102, 0.2));
+            background: #001F3F;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            transition: background 0.2s ease-in-out;
+            position: relative;
         }
 
         h1 {
             font-size: 2rem;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 2px 2px 10px rgba(0, 102, 204, 0.6);
+            color: white;
+            text-shadow: 2px 2px 10px rgba(0, 102, 204, 0.8);
             position: absolute;
             z-index: 2;
         }
 
-        .cursor-effect {
+        .background-effect {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at center, rgba(0, 102, 204, 0.3) 0%, rgba(0, 51, 102, 0) 60%);
             pointer-events: none;
-            transition: transform 0.05s linear;
+        }
+
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 102, 204, 0.6) 0%, rgba(0, 51, 102, 0) 80%);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.8;
+            transition: transform 0.05s ease-out;
         }
     </style>
 </head>
 <body>
     <h1>Добро пожаловать!</h1>
-    <div class="cursor-effect"></div>
+    <div class="background-effect"></div>
 
     <script>
-        document.addEventListener("mousemove", (event) => {
-            const cursorEffect = document.querySelector(".cursor-effect");
-            cursorEffect.style.transform = translate(${event.clientX - window.innerWidth / 2}px, ${event.clientY - window.innerHeight / 2}px);
+        document.addEventListener("DOMContentLoaded", () => {
+            const backgroundEffect = document.querySelector(".background-effect");
+
+            for (let i = 0; i < 5; i++) {
+                const blob = document.createElement("div");
+                blob.classList.add("blob");
+                blob.style.left = ${Math.random() * 100}vw;
+                blob.style.top = ${Math.random() * 100}vh;
+                backgroundEffect.appendChild(blob);
+            }
+
+            document.addEventListener("mousemove", (event) => {
+                const blobs = document.querySelectorAll(".blob");
+                blobs.forEach((blob, index) => {
+                    setTimeout(() => {
+                        blob.style.transform = translate(${event.clientX - 150}px, ${event.clientY - 150}px);
+                    }, index * 50);
+                });
+            });
+
+            document.addEventListener("touchmove", (event) => {
+                if (event.touches.length > 0) {
+                    const touch = event.touches[0];
+                    const blobs = document.querySelectorAll(".blob");
+                    blobs.forEach((blob, index) => {
+                        setTimeout(() => {
+                            blob.style.transform = translate(${touch.clientX - 150}px, ${touch.clientY - 150}px);
+                        }, index * 50);
+                    });
+                }
+            });
         });
     </script>
 </body>
