@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced 3D Effects Demo</title>
+    <title>Starfield Background with Rotating Logo and Text</title>
     <style>
         body, html {
             margin: 0;
@@ -12,70 +12,60 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 1000px;
+            color: white;
         }
 
-        .scene {
-            width: 300px;
-            height: 300px;
-            position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(20deg) rotateY(-30deg);
-            animation: rotate 20s infinite linear;
-        }
-
-        .cube {
+        .starfield {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            position: absolute;
+            background: transparent;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .logo-container {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateLogo 10s infinite linear;
+        }
+
+        .logo {
+            width: 100%;
+            height: 100%;
+            background: url('https://your-logo-url.com/logo.png') no-repeat center center;
+            background-size: contain;
             transform-style: preserve-3d;
         }
 
-        .face {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            color: #333;
-        }
-
-        .face:nth-child(1) { transform: rotateY(0deg) translateZ(150px); }
-        .face:nth-child(2) { transform: rotateY(90deg) translateZ(150px); }
-        .face:nth-child(3) { transform: rotateY(180deg) translateZ(150px); }
-        .face:nth-child(4) { transform: rotateY(-90deg) translateZ(150px); }
-        .face:nth-child(5) { transform: rotateX(90deg) translateZ(150px); }
-        .face:nth-child(6) { transform: rotateX(-90deg) translateZ(150px); }
-
-        @keyframes rotate {
+        @keyframes rotateLogo {
             from {
-                transform: rotateX(20deg) rotateY(-30deg);
+                transform: rotateY(0deg);
             }
             to {
-                transform: rotateX(20deg) rotateY(330deg);
+                transform: rotateY(360deg);
             }
         }
 
         .content {
             position: absolute;
-            top: 50px;
-            left: 50px;
-            right: 50px;
-            bottom: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            max-width: 600px;
             padding: 20px;
-            color: #fff;
-            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1;
         }
 
         .content h1 {
@@ -101,33 +91,76 @@
     </style>
 </head>
 <body>
-    <div class="scene">
-        <div class="cube">
-            <div class="face">Front</div>
-            <div class="face">Back</div>
-            <div class="face">Right</div>
-            <div class="face">Left</div>
-            <div class="face">Top</div>
-            <div class="face">Bottom</div>
-        </div>
+    <div class="starfield"></div>
+    <div class="logo-container">
+        <div class="logo"></div>
     </div>
     <div class="content">
-        <h1>Welcome to the Advanced 3D World</h1>
+        <h1>Welcome to Messa🌃</h1>
         <p>
-            This is an advanced demonstration of a 3D rotating cube with smooth animations and transitions.
-            The cube rotates infinitely to showcase the 3D effects and the text content is laid out to give it a more website-like appearance.
+            This is a demonstration of a starfield background with a rotating logo and text content.
+            The starfield creates the effect of stars flying towards the user, giving a sense of depth and motion.
         </p>
         <p>
-            In this example, we have added a gradient background and enhanced the cube with shadows, borders, and a more dynamic animation.
-            The text content includes headings, paragraphs, and links to demonstrate how you can style and position text relative to 3D elements.
+            The rotating logo adds a dynamic element to the page, making it visually appealing and engaging.
+            The text content is placed on top of the background and logo to ensure readability and focus.
         </p>
         <p>
-            Experiment with different styles, animations, and effects to see the full potential of 3D on the web.
-            You can <a href="#">click here</a> to learn more about 3D CSS animations.
+            Experiment with different styles, animations, and effects to see the full potential of 3D and animation on the web.
+            You can <a href="#">click here</a> to learn more about advanced CSS animations.
         </p>
         <p>
             Visit our <a href="#">GitHub repository</a> to see more examples and contribute to the project.
         </p>
     </div>
+    <script>
+        class Star {
+            constructor(x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            update() {
+                this.z -= 2;
+                if (this.z < 1) {
+                    this.z = Math.random() * 1000;
+                    this.x = (Math.random() - 0.5) * 1000;
+                    this.y = (Math.random() - 0.5) * 1000;
+                }
+            }
+
+            draw(ctx, width, height) {
+                const px = (this.x / this.z) * width + width / 2;
+                const py = (this.y / this.z) * height + height / 2;
+                const size = (1 - this.z / 1000) * 3;
+                ctx.fillStyle = "white";
+                ctx.fillRect(px, py, size, size);
+            }
+        }
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        document.querySelector(".starfield").appendChild(canvas);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const stars = Array.from({ length: 1000 }, () => new Star(
+            (Math.random() - 0.5) * 1000,
+            (Math.random() - 0.5) * 1000,
+            Math.random() * 1000
+        ));
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.update();
+                star.draw(ctx, canvas.width, canvas.height);
+            });
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
