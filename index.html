@@ -13,14 +13,11 @@
             overflow: hidden;
             font-family: 'Arial', sans-serif;
             background: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             color: white;
         }
 
         .starfield {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -33,7 +30,10 @@
         .logo-container {
             width: 300px;
             height: 100px;
-            position: relative;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             transform-style: preserve-3d;
             animation: rotateLogo 10s infinite linear;
         }
@@ -53,23 +53,24 @@
 
         @keyframes rotateLogo {
             from {
-                transform: rotateY(0deg);
+                transform: translateX(-50%) rotateY(0deg);
             }
             to {
-                transform: rotateY(360deg);
+                transform: translateX(-50%) rotateY(360deg);
             }
         }
 
         .content {
             position: absolute;
-            top: 20px;
+            top: 150px;
             left: 20px;
             right: 20px;
-            max-width: 600px;
+            bottom: 20px;
             padding: 20px;
             background: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
             z-index: 1;
         }
 
@@ -77,21 +78,42 @@
             margin-top: 0;
             font-size: 36px;
             text-align: center;
+            animation: fadeIn 2s;
         }
 
         .content p {
             margin: 20px 0;
             line-height: 1.8;
+            animation: fadeIn 2s;
         }
 
         .content a {
             color: #ff6347;
             text-decoration: none;
             font-weight: bold;
+            animation: fadeIn 2s;
         }
 
         .content a:hover {
             text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes star {
+            from {
+                transform: translateZ(0);
+            }
+            to {
+                transform: translateZ(1000px);
+            }
         }
     </style>
 </head>
