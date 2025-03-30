@@ -24,6 +24,7 @@
             background: #f9f9f9;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
             z-index: 2;
+            animation: moveMoon 10s infinite alternate;
         }
 
         .star {
@@ -32,22 +33,26 @@
             height: 2px;
             background: white;
             border-radius: 50%;
+            opacity: 0.8;
+            animation: moveStar 10s infinite alternate;
         }
 
         @keyframes moveStar {
             0% {
-                transform: translate(0, 0);
-            }
-            50% {
-                transform: translate(-10px, 10px);
+                transform: translate3d(0, 0, 0);
             }
             100% {
-                transform: translate(0, 0);
+                transform: translate3d(calc(50vw - 50%), calc(50vh - 50%), 0);
             }
         }
 
-        .star {
-            animation: moveStar 5s infinite ease-in-out;
+        @keyframes moveMoon {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
         }
     </style>
 </head>
