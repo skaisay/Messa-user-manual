@@ -21,10 +21,11 @@
             position: absolute;
             width: 100px;
             height: 100px;
+            top: 10%;
+            left: 10%;
             background: #f9f9f9;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            z-index: 2;
-            animation: moveMoon 10s infinite alternate;
+            box-shadow: inset 0 0 10px #ffffff, 0 0 20px rgba(255, 255, 255, 0.5);
+            transform: rotateY(45deg) rotateX(45deg);
         }
 
         .star {
@@ -34,24 +35,20 @@
             background: white;
             border-radius: 50%;
             opacity: 0.8;
-            animation: moveStar 10s infinite alternate;
+            animation: moveStar 10s infinite ease-in-out;
         }
 
         @keyframes moveStar {
             0% {
+                transform: translate3d(0, 0, -1000px);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
                 transform: translate3d(0, 0, 0);
-            }
-            100% {
-                transform: translate3d(calc(50vw - 50%), calc(50vh - 50%), 0);
-            }
-        }
-
-        @keyframes moveMoon {
-            0% {
-                transform: translateY(0);
-            }
-            100% {
-                transform: translateY(-10px);
+                opacity: 0;
             }
         }
     </style>
