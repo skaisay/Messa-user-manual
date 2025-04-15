@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Starfield Background</title>
+  <title>Cosmic Starfield</title>
   <style>
     body, html {
       margin: 0;
@@ -11,7 +11,8 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: transparent; /* Прозрачный фон */
+      background: rgba(0, 0, 0, 0.5); /* Стеклянный чёрный фон с прозрачностью */
+      backdrop-filter: blur(5px); /* Эффект размытия для стеклянного эффекта */
     }
 
     canvas {
@@ -33,10 +34,10 @@
     const ctx = canvas.getContext('2d');
 
     let stars = [];
-    const numStars = 200; // Количество звёзд
-    const speed = 2; // Скорость движения звёзд
+    const numStars = 300; // Количество звёзд
+    const speed = 2; // Скорость движения звезд (чем больше, тем быстрее)
 
-    // Функция для изменения размеров canvas при изменении окна
+    // Изменение размера canvas
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -44,7 +45,7 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Инициализация звёзд
+    // Генерация звёзд
     function initStars() {
       stars = [];
       for (let i = 0; i < numStars; i++) {
@@ -52,23 +53,24 @@
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
           z: Math.random() * canvas.width,
+          originalZ: Math.random() * canvas.width // Запоминаем изначальную глубину
         });
       }
     }
     initStars();
 
-    // Отрисовка звёзд
+    // Рисование звёзд
     function drawStars() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'white'; // Цвет звёзд
       for (const star of stars) {
         const k = 128 / star.z; // Перспектива
-        const x = star.x * k + canvas.width / 2;
-        const y = star.y * k + canvas.height / 2;
-        const radius = Math.max(0, 2 - star.z / 500); // Радиус звезды
+        const x = (star.x - canvas.width / 2) * k + canvas.width / 2;
+        const y = (star.y - canvas.height / 2) * k + canvas.height / 2;
+        const radius = Math.max(0, 2 - star.z / 300); // Размер звезды
 
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // Белый полупрозрачный цвет звёзд
         ctx.fill();
       }
     }
@@ -78,8 +80,8 @@
       for (const star of stars) {
         star.z -= speed;
         if (star.z <= 0) {
-          // Перезапуск звезды позади
-          star.z = canvas.width;
+          // Возвращаем звезду в исходное положение
+          star.z = star.originalZ;
           star.x = Math.random() * canvas.width;
           star.y = Math.random() * canvas.height;
         }
@@ -90,7 +92,7 @@
     function animate() {
       updateStars();
       drawStars();
-      requestAnimationFrame(animate); // Плавная анимация
+      requestAnimationFrame(animate);
     }
 
     animate();
