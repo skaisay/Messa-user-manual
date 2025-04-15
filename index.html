@@ -3,140 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mining Animation</title>
+  <title>3D Starfield Background</title>
   <style>
-    body {
+    body, html {
       margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #2c2f33; /* Шахтный фон */
-      overflow: hidden;
-    }
-
-    #container {
-      position: relative;
-      width: 600px;
-      height: 400px;
-      background: linear-gradient(to bottom, #3a3d40, #2c2f33);
-      border: 2px solid #111;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    svg {
+      padding: 0;
       width: 100%;
       height: 100%;
+      overflow: hidden;
+      background-color: transparent; /* Прозрачный фон */
     }
 
-    #counter {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #ffffff;
-      text-shadow: 1px 1px 2px #000;
-      opacity: 0;
-      transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Задний слой */
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <svg viewBox="0 0 600 400">
-      <!-- Шахтный фон -->
-      <rect width="600" height="400" fill="#3a3d40" />
-      <g id="background">
-        <rect x="0" y="350" width="600" height="50" fill="#5e5a5a" /> <!-- Земля -->
-      </g>
-
-      <!-- Камень -->
-      <g id="rock">
-        <ellipse cx="400" cy="330" rx="50" ry="30" fill="#555" />
-        <line x1="370" y1="320" x2="430" y2="340" stroke="#333" stroke-width="2" />
-        <line x1="390" y1="310" x2="410" y2="350" stroke="#333" stroke-width="2" />
-      </g>
-
-      <!-- Человечек -->
-      <g id="character">
-        <!-- Голова -->
-        <circle cx="200" cy="200" r="20" fill="#ffcc99" />
-        <!-- Тело -->
-        <rect x="190" y="220" width="20" height="60" fill="#333" />
-        <!-- Руки -->
-        <line id="left-arm" x1="200" y1="230" x2="160" y2="260" stroke="#333" stroke-width="8" />
-        <line id="right-arm" x1="200" y1="230" x2="240" y2="260" stroke="#333" stroke-width="8" />
-        <!-- Ноги -->
-        <line x1="200" y1="280" x2="180" y2="320" stroke="#333" stroke-width="8" />
-        <line x1="200" y1="280" x2="220" y2="320" stroke="#333" stroke-width="8" />
-      </g>
-
-      <!-- Кирка -->
-      <g id="pickaxe">
-        <line x1="160" y1="260" x2="140" y2="240" stroke="#8b4513" stroke-width="6" />
-        <line x1="140" y1="240" x2="150" y2="230" stroke="#a9a9a9" stroke-width="10" />
-      </g>
-    </svg>
-
-    <div id="counter">+1 Wave</div>
-  </div>
+  <canvas id="starfield"></canvas>
 
   <script>
-    const pickaxe = document.getElementById("pickaxe");
-    const rock = document.getElementById("rock");
-    const counter = document.getElementById("counter");
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
 
-    let waveCount = 0;
+    let stars = [];
+    const numStars = 200; // Количество звёзд
+    const speed = 2; // Скорость движения звёзд
 
-    // Анимация кирки
-    function animatePickaxe() {
-      pickaxe.animate([
-        { transform: "rotate(0deg)", transformOrigin: "160px 260px" },
-        { transform: "rotate(-60deg)", transformOrigin: "160px 260px" },
-        { transform: "rotate(0deg)", transformOrigin: "160px 260px" }
-      ], {
-        duration: 800,
-        iterations: Infinity
-      });
+    // Функция для изменения размеров canvas при изменении окна
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Инициализация звёзд
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          z: Math.random() * canvas.width,
+        });
+      }
+    }
+    initStars();
+
+    // Отрисовка звёзд
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white'; // Цвет звёзд
+      for (const star of stars) {
+        const k = 128 / star.z; // Перспектива
+        const x = star.x * k + canvas.width / 2;
+        const y = star.y * k + canvas.height / 2;
+        const radius = Math.max(0, 2 - star.z / 500); // Радиус звезды
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.fill();
+      }
     }
 
-    // Вибрация камня
-    function animateRock() {
-      rock.animate([
-        { transform: "translateX(0)" },
-        { transform: "translateX(-2px)" },
-        { transform: "translateX(2px)" },
-        { transform: "translateX(0)" }
-      ], {
-        duration: 100,
-        iterations: Infinity,
-        easing: "step-end"
-      });
+    // Обновление позиций звёзд
+    function updateStars() {
+      for (const star of stars) {
+        star.z -= speed;
+        if (star.z <= 0) {
+          // Перезапуск звезды позади
+          star.z = canvas.width;
+          star.x = Math.random() * canvas.width;
+          star.y = Math.random() * canvas.height;
+        }
+      }
     }
 
-    // Обновление счётчика
-    function updateCounter() {
-      waveCount++;
-      counter.textContent = `+${waveCount} Wave`;
-      counter.style.opacity = "1";
-      counter.style.transform = "translateX(-50%) translateY(-10px)";
-      setTimeout(() => {
-        counter.style.opacity = "0";
-        counter.style.transform = "translateX(-50%) translateY(0)";
-      }, 500);
+    // Анимация
+    function animate() {
+      updateStars();
+      drawStars();
+      requestAnimationFrame(animate); // Плавная анимация
     }
 
-    // Запуск анимации
-    animatePickaxe();
-    animateRock();
-
-    // Цикл счётчика
-    setInterval(() => {
-      updateCounter();
-    }, 800);
+    animate();
   </script>
 </body>
 </html>
