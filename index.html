@@ -1,99 +1,146 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Starfield</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: transparent;
-        }
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }
-    </style>
-</head>
-<body>
-    <canvas id="starfield"></canvas>
-    <script>
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.min.js"></script>
+<script id="vertexShader" type="x-shader/x-vertex">
+    void main() {
+        gl_Position = vec4( position, 1.0 );
+    }
+</script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+    uniform vec2 u_resolution;
+    uniform float u_time;
+  
+    const int octaves = 2;
+    const float seed2 = 73156.8473192;
+    const float seed = 43758.5453123;
+  
+  
+    /*
+      Slime
+      Liam Egan - 2018
+      ----------------------
 
-        // Set canvas size to match window size
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+      FBM noise being used as a bump map for a very basic raytracer.
+      Simple and elegant.
+      
+      Many many thanks to Inigo Quilez, Patricio Gonzalez Vivo, 
+      Gary Warne, and many many others.
+      "Nanos gigantum humeris insidentes"
 
-        // Star configuration
-        const stars = [];
-        const starCount = 100; // Adjust based on screen size and performance
-        const maxDepth = 1000;
-        const starSpeed = 0.3; // Lower value = slower movement
+    */
+  
+    vec2 random2(vec2 st, float seed){
+        st = vec2( dot(st,vec2(127.1,311.7)),
+                  dot(st,vec2(269.5,183.3)) );
+        return -1.0 + 2.0*fract(sin(st)*seed);
+    }
+  
+    // Value Noise by Inigo Quilez - iq/2013
+    // https://www.shadertoy.com/view/lsf3WH
+    float noise(vec2 st, float seed) {
+        vec2 i = floor(st);
+        vec2 f = fract(st);
 
-        // Star class
-        class Star {
-            constructor() {
-                this.reset();
-            }
+        vec2 u = f*f*(3.0-2.0*f);
 
-            reset() {
-                this.x = (Math.random() - 0.5) * canvas.width;
-                this.y = (Math.random() - 0.5) * canvas.height;
-                this.z = Math.random() * maxDepth;
-            }
+        return mix( mix( dot( random2(i + vec2(0.0,0.0), seed ), f - vec2(0.0,0.0) ), 
+                         dot( random2(i + vec2(1.0,0.0), seed ), f - vec2(1.0,0.0) ), u.x),
+                    mix( dot( random2(i + vec2(0.0,1.0), seed ), f - vec2(0.0,1.0) ), 
+                         dot( random2(i + vec2(1.0,1.0), seed ), f - vec2(1.0,1.0) ), u.x), u.y);
+    }
+  
+    float fbm1(in vec2 _st, float seed) {
+      float v = 0.0;
+      float a = 0.5;
+      vec2 shift = vec2(100.0);
+      // Rotate to reduce axial bias
+      mat2 rot = mat2(cos(0.5), sin(0.5),
+                      -sin(0.5), cos(0.50));
+      for (int i = 0; i < octaves; ++i) {
+          v += a * noise(_st, seed);
+          _st = rot * _st * 2.0 + shift;
+          a *= 0.4;
+      }
+      return v + .4;
+    }
+  
+    float pattern(vec2 uv, float seed, float time, inout vec2 q, inout vec2 r) {
 
-            update() {
-                this.z -= starSpeed;
-                if (this.z <= 0) {
-                    this.reset();
-                }
-            }
+      q = vec2( fbm1( uv + vec2(0.0,0.0), seed ),
+                     fbm1( uv + vec2(5.2,1.3), seed ) );
 
-            draw() {
-                const scale = maxDepth / (this.z + maxDepth);
-                const x = canvas.width / 2 + this.x * scale;
-                const y = canvas.height / 2 + this.y * scale;
-                const size = scale * 1.5;
+      r = vec2( fbm1( uv + 4.0*q + vec2(1.7 - time / 2.,9.2), seed ),
+                     fbm1( uv + 4.0*q + vec2(8.3 - time / 2.,2.8), seed ) );
 
-                ctx.beginPath();
-                ctx.fillStyle = `rgba(255, 255, 255, ${scale})`;
-                ctx.arc(x, y, size, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-        }
+      float rtn = fbm1( uv + 4.0*r, seed );
 
-        // Create stars
-        for (let i = 0; i < starCount; i++) {
-            stars.push(new Star());
-        }
+      return rtn;
+    }
+  
+    float bumpMap(vec2 uv, inout vec2 q, inout vec2 r) {
+      mat2 rotation = mat2(
+        cos(u_time / 50.), -sin(u_time / 50.),
+        sin(u_time / 50.), cos(u_time / 50.)
+      );
+      uv -= .5;
+      uv *= rotation;
+      uv *= 5.;
+      
+      float colour = pattern(uv, seed, u_time / 3., q, r);
+      colour = smoothstep(0., 1., colour);
+      
+      return length(vec2(colour))*.8;
+    }
 
-        // Animation loop
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    vec4 renderPass(vec2 uv, vec2 uvoffset) {
+      vec3 surfacePos = vec3(uv, 0);
+      vec3 ray = normalize(vec3(uv, 1.));
+      vec3 lightPos = vec3(0., 0., -3.);
+      vec3 normal = vec3(0., 0., -1);
 
-            stars.forEach(star => {
-                star.update();
-                star.draw();
-            });
+      vec2 sampleDistance = vec2(1. / u_resolution.y, 0.);
+      
+      vec2 q = vec2(0.,0.);
+      vec2 r = vec2(0.,0.);
 
-            requestAnimationFrame(animate);
-        }
+      float fx = bumpMap(surfacePos.xy-sampleDistance.xy + uvoffset, q, r);
+      float fy = bumpMap(surfacePos.xy-sampleDistance.yx + uvoffset, q, r);
+      float f = bumpMap(surfacePos.xy + uvoffset, q, r);
+      fx = (fx-f)/sampleDistance.x;
+      fy = (fy-f)/sampleDistance.x;
+      normal = normalize( normal + vec3(fx, fy, 0.) * 0.2 );           
 
-        // Start animation
-        animate();
-    </script>
-</body>
-</html>
+      vec3 lightV = lightPos - surfacePos;
+      float lightDist = max(length(lightV), 0.001);
+      lightV /= lightDist;
+      
+      vec3 lightColour = vec3(r.r * f * 3., r.g * f * 3., r.g * f * 3.);
+
+      float falloff = 0.05;
+      float attenuation = 1./(1.0 + lightDist*lightDist*falloff);
+
+      float diffuse = max(dot(normal, lightV), 0.);
+      float specular = pow(max(dot( reflect(-lightV, normal), -ray), 0.), 22.); 
+
+      vec3 texCol = vec3(0.15, .15 + r.g * f * 2., q.r * f * 1.5);
+      texCol = smoothstep(0.05, .75, pow(texCol*texCol, vec3(.55, .99, .85)));
+      // texCol = vec3(f * .5, f, f * .2);
+      
+      vec3 colour = (texCol * (diffuse*vec3(1, .97, .92)*2. + 0.5) + lightColour*specular * f * 2.)*attenuation;
+      
+      return vec4(sqrt(colour), 1.);
+    }
+  
+  void main() {
+    
+    vec2 fragCoord = gl_FragCoord.xy;
+      // Screen coordinates.
+    vec2 uv = (fragCoord - u_resolution.xy*.5)/u_resolution.y;
+    
+    vec4 render = renderPass(uv, vec2(1.));
+    
+    gl_FragColor = render;
+  }
+
+</script>
+
+
+<div id="container"></div>
