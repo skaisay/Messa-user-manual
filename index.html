@@ -1,255 +1,89 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synapzo AI App Bot</title>
-  <style>
-    /* Общие стили */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to bottom, #f5f5f5, #e0e0ff);
-      color: #333;
-      scroll-behavior: smooth;
-    }
-
-    header {
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: white;
-      text-align: center;
-      padding: 50px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    header h1 {
-      font-size: 2.5rem;
-      margin: 0;
-    }
-
-    header p {
-      font-size: 1.2rem;
-    }
-
-    .section {
-      padding: 70px 20px;
-      margin: 20px auto;
-      max-width: 1200px;
-      text-align: center;
-      background: white;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      border-radius: 15px;
-      transition: transform 0.3s ease;
-    }
-
-    .section:hover {
-      transform: translateY(-10px);
-    }
-
-    /* Анимация появления */
-    .section, .features-container, .screenshots-container img {
-      opacity: 0;
-      transform: translateY(50px);
-      transition: all 0.8s ease;
-    }
-
-    .section.visible, .features-container.visible, .screenshots-container img.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Стили карточек */
-    .features-container {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .feature-card {
-      background: #f0f0f0;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      flex: 1 1 calc(30% - 40px);
-      transition: transform 0.3s ease, background 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-card:hover {
-      transform: scale(1.05);
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: white;
-    }
-
-    .feature-card h3,
-    .feature-card p {
-      margin: 10px 0;
-    }
-
-    .feature-card-icon {
-      font-size: 3rem;
-      margin-bottom: 10px;
-      animation: float 2s infinite ease-in-out;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    /* Стили для скриншотов */
-    .screenshots-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .screenshots-container img {
-      width: 200px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease;
-    }
-
-    .screenshots-container img:hover {
-      transform: scale(1.1);
-    }
-
-    /* Стили для всплывающих окон */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      z-index: 2000;
-      width: 80%;
-      max-width: 500px;
-      text-align: center;
-    }
-
-    .modal.active {
-      display: block;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      cursor: pointer;
-      font-size: 1.5rem;
-      color: #666;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@SynapzoAIappbot - Презентация</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Шапка сайта -->
-  <header class="header">
-    <h1>@SynapzoAIappbot</h1>
-    <p>Инновационное мини-приложение Telegram</p>
-  </header>
+    <nav>
+        <ul>
+            <li><a href="#about">О приложении</a></li>
+            <li><a href="#features">Функции</a></li>
+            <li><a href="#themes">Темы оформления</a></li>
+            <li><a href="#profile">Профиль</a></li>
+            <li><a href="#currency">Валюта</a></li>
+            <li><a href="#shop">Магазин</a></li>
+            <li><a href="#screenshots">Скриншоты</a></li>
+            <li><a href="#contacts">Контакты</a></li>
+        </ul>
+    </nav>
 
-  <!-- Секция "О приложении" -->
-  <section id="about" class="section">
-    <h2>О приложении</h2>
-    <p>Synapzo AI — это удобное и функциональное мини-приложение для Telegram, которое позволяет вам взаимодействовать с друзьями, участвовать в активности и использовать игровые возможности.</p>
-  </section>
+    <!-- Секция "О приложении" -->
+    <section id="about" class="fade-in">
+        <h1>О приложении</h1>
+        <p>Здесь вы можете вставить текст о вашем приложении.</p>
+    </section>
 
-  <!-- Секция "Функции" -->
-  <section id="features" class="section">
-    <h2>Функции</h2>
-    <div class="features-container">
-      <div class="feature-card" onclick="showModal('feature1')">
-        <div class="feature-card-icon">📷</div>
-        <h3>Публикация фото</h3>
-        <p>Возможность постить фото, ставить лайки, зумить изображения.</p>
-      </div>
-      <div class="feature-card" onclick="showModal('feature2')">
-        <div class="feature-card-icon">💰</div>
-        <h3>Игровая валюта Wave</h3>
-        <p>Получайте 100 Wave при регистрации и ежедневно за активность.</p>
-      </div>
-      <div class="feature-card" onclick="showModal('feature3')">
-        <div class="feature-card-icon">🎮</div>
-        <h3>Система активности</h3>
-        <p>Начисление баллов за использование приложения, лайки и посты.</p>
-      </div>
-    </div>
-  </section>
+    <!-- Секция "Функции" -->
+    <section id="features" class="fade-in">
+        <h1>Функции</h1>
+        <div class="card">
+            <h2>Возможность постить фото</h2>
+            <p>Узнайте, как легко делиться моментами с друзьями.</p>
+        </div>
+        <!-- Добавьте другие функции в карточки -->
+    </section>
 
-  <!-- Секция "Темы оформления" -->
-  <section id="themes" class="section">
-    <h2>Темы оформления</h2>
-    <p>Приложение поддерживает живые и статические темы: Горы, Лес, Океан, Посёлок, и другие.</p>
-  </section>
+    <!-- Секция "Темы оформления" -->
+    <section id="themes" class="fade-in">
+        <h1>Темы оформления</h1>
+        <!-- Здесь можно добавить изображения тем -->
+        <p>Темы: Горы, Лес, Океан...</p>
+    </section>
 
-  <!-- Секция "Скриншоты" -->
-  <section id="screenshots" class="section">
-    <h2>Скриншоты</h2>
-    <div class="screenshots-container">
-      <img src="https://i.postimg.cc/X7pP5pvF/IMG-7121.jpg" alt="Скриншот 1">
-      <img src="https://i.postimg.cc/Zn0w6MJZ/IMG-7122.jpg" alt="Скриншот 2">
-      <img src="https://i.postimg.cc/q70Q1Rp1/IMG-7119.jpg" alt="Скриншот 3">
-      <img src="https://i.postimg.cc/6Q9LdmhS/IMG-7118.jpg" alt="Скриншот 4">
-    </div>
-  </section>
+    <!-- Секция "Профиль" -->
+    <section id="profile" class="fade-in">
+        <h1>Профиль</h1>
+        <p>Ваш расширенный профиль с информацией.</p>
+    </section>
 
-  <!-- Всплывающие окна -->
-  <div id="feature1" class="modal">
-    <span class="modal-close" onclick="closeModal('feature1')">&times;</span>
-    <h2>Публикация фото</h2>
-    <p>Здесь можно подробно рассказать о функции публикации фото.</p>
-  </div>
-  <div id="feature2" class="modal">
-    <span class="modal-close" onclick="closeModal('feature2')">&times;</span>
-    <h2>Игровая валюта Wave</h2>
-    <p>Здесь можно подробно рассказать о валюте Wave.</p>
-  </div>
-  <div id="feature3" class="modal">
-    <span class="modal-close" onclick="closeModal('feature3')">&times;</span>
-    <h2>Система активности</h2>
-    <p>Здесь можно подробно рассказать о системе активности.</p>
-  </div>
+    <!-- Секция "Валюта" -->
+    <section id="currency" class="fade-in">
+        <h1>Валюта</h1>
+        <p>Валюта приложения: Wave. Начисляется каждый день!</p>
+    </section>
 
-  <script>
-    // Анимация появления секций при прокрутке
-    document.addEventListener('scroll', () => {
-      const sections = document.querySelectorAll('.section, .features-container, .screenshots-container img');
-      const triggerHeight = window.innerHeight / 1.3;
+    <!-- Секция "Магазин" -->
+    <section id="shop" class="fade-in">
+        <h1>Магазин</h1>
+        <p>Покупайте скины и статусы с использованием валюты.</p>
+    </section>
 
-      sections.forEach(section => {
-        const sectionTop = section.getBoundingClientRect().top;
+    <!-- Секция "Скриншоты" -->
+    <section id="screenshots" class="fade-in">
+        <h1>Скриншоты</h1>
+        <div class="screenshot-card">
+            <img src="https://i.postimg.cc/X7pP5pvF/IMG-7121.jpg" alt="Скриншот 1">
+        </div>
+        <div class="screenshot-card">
+            <img src="https://i.postimg.cc/Zn0w6MJZ/IMG-7122.jpg" alt="Скриншот 2">
+        </div>
+        <div class="screenshot-card">
+            <img src="https://i.postimg.cc/q70Q1Rp1/IMG-7119.jpg" alt="Скриншот 3">
+        </div>
+        <div class="screenshot-card">
+            <img src="https://i.postimg.cc/6Q9LdmhS/IMG-7118.jpg" alt="Скриншот 4">
+        </div>
+    </section>
 
-        if (sectionTop < triggerHeight) {
-          section.classList.add('visible');
-        }
-      });
-    });
+    <!-- Секция "Контакты" -->
+    <section id="contacts" class="fade-in">
+        <h1>Контакты</h1>
+        <p>Здесь можно указать контакты для связи.</p>
+    </section>
 
-    // Функция для отображения модальных окон
-    function showModal(id) {
-      document.getElementById(id).classList.add('active');
-    }
-
-    // Функция для закрытия модальных окон
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-    }
-  </script>
+    <script src="script.js"></script>
 </body>
 </html>
