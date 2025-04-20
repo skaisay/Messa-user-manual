@@ -10,55 +10,51 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background-color: #e0e7ff; /* Светлый фон */
             color: #333;
-            overflow-x: hidden; /* запрет горизонтальной прокрутки */
-        }
-
-        nav {
-            background-color: #4a90e2;
-            padding: 15px;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
+            overflow-x: hidden; /* Запрет горизонтальной прокрутки */
         }
 
         section {
             padding: 50px 20px;
-            margin: 10px 0;
+            margin: 0; /* Убираем отступы между секциями */
             opacity: 0;
             transition: opacity 0.6s ease-in;
-            height: 100vh; /* Сделать секции на весь экран */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
+            height: 100vh; /* Высота секции на весь экран */
+            background-color: white; /* Белый фон для каждой секции */
+            border-bottom: 1px solid #ddd; /* Линия между секциями */
         }
 
         .fade-in {
-            opacity: 1; /* Убирать opacity по классу */
+            opacity: 1; /* Появление секции */
+        }
+
+        h1 {
+            font-size: 2.5em; /* Размер заголовка */
+            margin: 0.5em 0; /* Равномерные отступы */
+        }
+
+        p {
+            font-size: 1.2em; /* Размер текста */
+            max-width: 800px; /* Максимальная ширина текста */
+            line-height: 1.5; /* Интервал между строками */
+            margin: 0.5em 0; /* Равномерные отступы */
         }
 
         .feature-container {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            max-width: 1200px; /* Максимальная ширина контейнера */
+            max-width: 1200px;
         }
 
         .feature {
-            background: white;
+            background: #f9f9f9;
             border-radius: 10px;
             padding: 20px;
             margin: 10px;
@@ -79,7 +75,7 @@
 
         .screenshot-card {
             margin: 10px;
-            max-width: 300px; /* Максимальная ширина для скриншотов */
+            max-width: 300px;
         }
 
         .screenshot-card img {
@@ -91,22 +87,10 @@
 </head>
 
 <body>
-    <nav>
-        <ul>
-            <li><a href="#about">О приложении</a></li>
-            <li><a href="#features">Функции</a></li>
-            <li><a href="#themes">Темы оформления</a></li>
-            <li><a href="#profile">Профиль</a></li>
-            <li><a href="#currency">Валюта</a></li>
-            <li><a href="#shop">Магазин</a></li>
-            <li><a href="#screenshots">Скриншоты</a></li>
-            <li><a href="#contacts">Контакты</a></li>
-        </ul>
-    </nav>
 
     <section id="about" class="fade-in">
         <h1>О приложении</h1>
-        <p>Это мини-приложение помогает пользователям делиться фотографиями и взаимодействовать.</p>
+        <p>Это мини-приложение позволяет пользователям делиться фотографиями и взаимодействовать друг с другом.</p>
     </section>
 
     <section id="features" class="fade-in">
@@ -130,7 +114,7 @@
             <div class="feature">
                 <i class="fas fa-store"></i>
                 <h2>Магазин</h2>
-                <p>Приобретайте скины и статусы за валюту в приложении.</p>
+                <p>Приобретайте скины и статусы за валюту.</p>
             </div>
         </div>
     </section>
@@ -171,12 +155,8 @@
         </div>
     </section>
 
-    <section id="contacts" class="fade-in">
-        <h1>Контакты</h1>
-        <p>Для связи используйте указанные контакты.</p>
-    </section>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMr0cM1C9Aw6UnkByk+l5UrY2QQ3Z0h0L1y6Mx" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"
+        integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMr0cM1C9Aw6UnkByk+l5UrY2QQ3Z0h0L1y6Mx" crossorigin="anonymous"></script>
     <script>
         const sections = document.querySelectorAll("section");
 
