@@ -1,11 +1,95 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@SynapzoAIappbot - Презентация</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            overflow-x: hidden; /* запрет горизонтальной прокрутки */
+        }
+
+        nav {
+            background-color: #4a90e2;
+            padding: 15px;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        section {
+            padding: 50px 20px;
+            margin: 10px 0;
+            opacity: 0;
+            transition: opacity 0.6s ease-in;
+            height: 100vh; /* Сделать секции на весь экран */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .fade-in {
+            opacity: 1; /* Убирать opacity по классу */
+        }
+
+        .feature-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px; /* Максимальная ширина контейнера */
+        }
+
+        .feature {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            flex: 1 1 200px;
+            transition: transform 0.3s;
+        }
+
+        .feature:hover {
+            transform: scale(1.05);
+        }
+
+        .feature i {
+            font-size: 40px;
+            color: #4a90e2;
+        }
+
+        .screenshot-card {
+            margin: 10px;
+            max-width: 300px; /* Максимальная ширина для скриншотов */
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
+
 <body>
     <nav>
         <ul>
@@ -20,48 +104,57 @@
         </ul>
     </nav>
 
-    <!-- Секция "О приложении" -->
     <section id="about" class="fade-in">
         <h1>О приложении</h1>
-        <p>Здесь вы можете вставить текст о вашем приложении.</p>
+        <p>Это мини-приложение помогает пользователям делиться фотографиями и взаимодействовать.</p>
     </section>
 
-    <!-- Секция "Функции" -->
     <section id="features" class="fade-in">
         <h1>Функции</h1>
-        <div class="card">
-            <h2>Возможность постить фото</h2>
-            <p>Узнайте, как легко делиться моментами с друзьями.</p>
+        <div class="feature-container">
+            <div class="feature">
+                <i class="fas fa-camera"></i>
+                <h2>Постинг фото</h2>
+                <p>Возможность делать посты с фотографиями и ставить лайки.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-coins"></i>
+                <h2>Игровая валюта</h2>
+                <p>Начисляется 100 Wave при регистрации.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-check-circle"></i>
+                <h2>Верификация</h2>
+                <p>Синяя галочка на постах и профиле.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-store"></i>
+                <h2>Магазин</h2>
+                <p>Приобретайте скины и статусы за валюту в приложении.</p>
+            </div>
         </div>
-        <!-- Добавьте другие функции в карточки -->
     </section>
 
-    <!-- Секция "Темы оформления" -->
     <section id="themes" class="fade-in">
         <h1>Темы оформления</h1>
-        <!-- Здесь можно добавить изображения тем -->
-        <p>Темы: Горы, Лес, Океан...</p>
+        <p>Выбор из красивых задних фонов: Горы, Лес, Океан, Город, Зима и другие.</p>
     </section>
 
-    <!-- Секция "Профиль" -->
     <section id="profile" class="fade-in">
         <h1>Профиль</h1>
-        <p>Ваш расширенный профиль с информацией.</p>
+        <p>Расширенная информация с ID, IP и датой регистрации.</p>
     </section>
 
-    <!-- Секция "Валюта" -->
     <section id="currency" class="fade-in">
         <h1>Валюта</h1>
-        <p>Валюта приложения: Wave. Начисляется каждый день!</p>
+        <p>Валюта: Wave, начисляется каждый день за активность.</p>
     </section>
 
-    <!-- Секция "Магазин" -->
     <section id="shop" class="fade-in">
         <h1>Магазин</h1>
-        <p>Покупайте скины и статусы с использованием валюты.</p>
+        <p>Покупайте скины и статусы с помощью валюты.</p>
     </section>
 
-    <!-- Секция "Скриншоты" -->
     <section id="screenshots" class="fade-in">
         <h1>Скриншоты</h1>
         <div class="screenshot-card">
@@ -78,12 +171,29 @@
         </div>
     </section>
 
-    <!-- Секция "Контакты" -->
     <section id="contacts" class="fade-in">
         <h1>Контакты</h1>
-        <p>Здесь можно указать контакты для связи.</p>
+        <p>Для связи используйте указанные контакты.</p>
     </section>
 
-    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMr0cM1C9Aw6UnkByk+l5UrY2QQ3Z0h0L1y6Mx" crossorigin="anonymous"></script>
+    <script>
+        const sections = document.querySelectorAll("section");
+
+        function fadeInSection() {
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+
+                if (sectionTop < windowHeight - 100) {
+                    section.classList.add('fade-in');
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", fadeInSection);
+        window.addEventListener("scroll", fadeInSection);
+    </script>
 </body>
+
 </html>
