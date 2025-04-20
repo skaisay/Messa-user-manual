@@ -10,7 +10,7 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: #f5f5f5;
+      background: linear-gradient(to bottom, #f5f5f5, #e0e0ff);
       color: #333;
       scroll-behavior: smooth;
     }
@@ -20,16 +20,34 @@
       color: white;
       text-align: center;
       padding: 50px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+    }
+
+    header p {
+      font-size: 1.2rem;
     }
 
     .section {
-      padding: 50px 20px;
+      padding: 70px 20px;
       margin: 20px auto;
       max-width: 1200px;
       text-align: center;
       background: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+    }
+
+    .section:hover {
+      transform: translateY(-10px);
     }
 
     /* Анимация появления */
@@ -49,20 +67,44 @@
       display: flex;
       justify-content: space-around;
       flex-wrap: wrap;
+      gap: 20px;
     }
 
     .feature-card {
       background: #f0f0f0;
       padding: 20px;
-      margin: 10px;
       border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       flex: 1 1 calc(30% - 40px);
-      transition: transform 0.3s;
+      transition: transform 0.3s ease, background 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
     .feature-card:hover {
       transform: scale(1.05);
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+    }
+
+    .feature-card h3,
+    .feature-card p {
+      margin: 10px 0;
+    }
+
+    .feature-card-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      animation: float 2s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
     /* Стили для скриншотов */
@@ -76,7 +118,42 @@
     .screenshots-container img {
       width: 200px;
       border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .screenshots-container img:hover {
+      transform: scale(1.1);
+    }
+
+    /* Стили для всплывающих окон */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .modal.active {
+      display: block;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #666;
     }
   </style>
 </head>
@@ -97,15 +174,18 @@
   <section id="features" class="section">
     <h2>Функции</h2>
     <div class="features-container">
-      <div class="feature-card">
+      <div class="feature-card" onclick="showModal('feature1')">
+        <div class="feature-card-icon">📷</div>
         <h3>Публикация фото</h3>
         <p>Возможность постить фото, ставить лайки, зумить изображения.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" onclick="showModal('feature2')">
+        <div class="feature-card-icon">💰</div>
         <h3>Игровая валюта Wave</h3>
         <p>Получайте 100 Wave при регистрации и ежедневно за активность.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" onclick="showModal('feature3')">
+        <div class="feature-card-icon">🎮</div>
         <h3>Система активности</h3>
         <p>Начисление баллов за использование приложения, лайки и посты.</p>
       </div>
@@ -129,6 +209,23 @@
     </div>
   </section>
 
+  <!-- Всплывающие окна -->
+  <div id="feature1" class="modal">
+    <span class="modal-close" onclick="closeModal('feature1')">&times;</span>
+    <h2>Публикация фото</h2>
+    <p>Здесь можно подробно рассказать о функции публикации фото.</p>
+  </div>
+  <div id="feature2" class="modal">
+    <span class="modal-close" onclick="closeModal('feature2')">&times;</span>
+    <h2>Игровая валюта Wave</h2>
+    <p>Здесь можно подробно рассказать о валюте Wave.</p>
+  </div>
+  <div id="feature3" class="modal">
+    <span class="modal-close" onclick="closeModal('feature3')">&times;</span>
+    <h2>Система активности</h2>
+    <p>Здесь можно подробно рассказать о системе активности.</p>
+  </div>
+
   <script>
     // Анимация появления секций при прокрутке
     document.addEventListener('scroll', () => {
@@ -144,12 +241,15 @@
       });
     });
 
-    // Комментарии для удобного редактирования
-    // В HTML и JS можно редактировать:
-    // - заголовки секций
-    // - тексты карточек
-    // - URL для изображений
-    // - настройки анимаций
+    // Функция для отображения модальных окон
+    function showModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Функция для закрытия модальных окон
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
   </script>
 </body>
 </html>
