@@ -127,18 +127,18 @@
 
         .winner-section button, .gemini-feature button {
             margin-top: 10px;
-            padding: 10px 20px; /* Уменьшил паддинг для кнопок Gemini */
+            padding: 10px 20px; 
             background: #3498db;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 0.9em; /* Уменьшил шрифт для кнопок Gemini */
+            font-size: 0.9em; 
         }
         .winner-section button:hover, .gemini-feature button:hover:not(:disabled) {
             background: #2980b9;
         }
         .gemini-feature button {
-            background-color: #9b59b6; /* Фиолетовый для Gemini */
+            background-color: #9b59b6; 
         }
         .gemini-feature button:hover:not(:disabled) {
             background-color: #8e44ad;
@@ -269,19 +269,19 @@
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
 
-        .chat-input-controls button { /* Кнопка отправки и генерации фразы */
-            padding: 10px 15px; /* Уменьшил для компактности */
+        .chat-input-controls button { 
+            padding: 10px 15px; 
             background: #2ecc71; 
             color: white;
             border: none;
             border-radius: 20px;
-            font-size: 14px; /* Уменьшил шрифт */
+            font-size: 14px; 
             font-weight: 500;
-            min-width: 40px; /* Минимальная ширина для иконок */
+            min-width: 40px; 
             text-align: center;
         }
-        .chat-input-controls button.gemini-chat-btn { /* Отдельный стиль для кнопки Gemini в чате */
-             background: #9b59b6; /* Фиолетовый */
+        .chat-input-controls button.gemini-chat-btn { 
+             background: #9b59b6; 
         }
         .chat-input-controls button.gemini-chat-btn:hover:not(:disabled) {
             background: #8e44ad;
@@ -299,7 +299,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.2s;
-            line-height: 1; /* Для выравнивания иконки */
+            line-height: 1; 
         }
         .file-upload-label:hover { background-color: #e0e0e0; }
 
@@ -362,8 +362,8 @@
         }
         .loading-indicator, .error-indicator {
             text-align: center;
-            padding: 10px; /* Уменьшил паддинг */
-            font-size: 1em; /* Уменьшил шрифт */
+            padding: 10px; 
+            font-size: 1em; 
             color: #7f8c8d;
         }
         .error-indicator { color: #e74c3c; }
@@ -374,387 +374,386 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Замените на URL вашего реального сервера для чата
-        const API_BASE_URL = 'http://localhost:3000'; 
-        // const API_BASE_URL = 'https://your-replit-project-name.repl.co';
+        // Оборачиваем весь код в window.onload для гарантии загрузки всех CDN скриптов
+        window.onload = function() {
+            // Замените на URL вашего реального сервера для чата
+            const API_BASE_URL = 'http://localhost:3000'; 
+            // const API_BASE_URL = 'https://your-replit-project-name.repl.co';
 
-        const { useState, useEffect, useRef, StrictMode } = React;
-        const { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient: useTanQueryClient } = ReactQuery; 
-        const { useSwipeable } = window.ReactSwipeable; // ИЗМЕНЕНИЕ: Явно указываем window.ReactSwipeable
+            const { useState, useEffect, useRef, StrictMode } = React;
+            const { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient: useTanQueryClient } = ReactQuery; 
+            
+            // Теперь ReactSwipeable должен быть доступен в window
+            const { useSwipeable } = window.ReactSwipeable || {}; // Добавим || {} для большей безопасности, если вдруг что-то пойдет не так
 
-        // --- Gemini API Helper ---
-        async function generateTextFromGemini(promptText) {
-            const apiKey = ""; // API ключ будет обработан средой Canvas
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            // --- Gemini API Helper ---
+            async function generateTextFromGemini(promptText) {
+                const apiKey = ""; // API ключ будет обработан средой Canvas
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-            const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [{ text: promptText }]
-                }],
-                 generationConfig: { // Добавим конфигурацию для контроля вывода
-                  temperature: 0.7,
-                  maxOutputTokens: 150, // Ограничим длину ответа
-                }
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error("Gemini API Error Response:", errorData);
-                    const message = errorData.error?.message || response.statusText;
-                    if (response.status === 429) { // Слишком много запросов
-                         throw new Error(`Слишком много запросов к Gemini API. Попробуйте позже. (${response.status})`);
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [{ text: promptText }]
+                    }],
+                    generationConfig: { 
+                        temperature: 0.7,
+                        maxOutputTokens: 150, 
                     }
-                    throw new Error(`Ошибка Gemini API: ${message} (${response.status})`);
-                }
+                };
 
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text.trim();
-                } else {
-                    console.error("Неожиданная структура ответа Gemini API:", result);
-                    if (result.promptFeedback && result.promptFeedback.blockReason) {
-                         throw new Error(`Запрос к Gemini был заблокирован: ${result.promptFeedback.blockReason} ${result.promptFeedback.blockReasonMessage || ''}. Пожалуйста, измените запрос.`);
-                    }
-                    throw new Error("Не удалось получить текст из ответа Gemini.");
-                }
-            } catch (error) {
-                console.error('Ошибка вызова Gemini API:', error);
-                throw error; 
-            }
-        }
-
-
-        // --- Компонент игры "Крестики-Нолики" ---
-        const TicTacToeGame = () => {
-            const [board, setBoard] = useState(Array(9).fill(null));
-            const [isXTurn, setIsXTurn] = useState(true);
-            const [winner, setWinner] = useState(null);
-            const [statusMessage, setStatusMessage] = useState('Ход игрока X');
-
-            // Состояния для Gemini анализа игры
-            const [gameAnalysis, setGameAnalysis] = useState('');
-            const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
-            const [analysisError, setAnalysisError] = useState('');
-
-            const calculateWinner = (squares) => {
-                const lines = [
-                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                    [0, 4, 8], [2, 4, 6],
-                ];
-                for (let i = 0; i < lines.length; i++) {
-                    const [a, b, c] = lines[i];
-                    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-                        return squares[a];
-                    }
-                }
-                if (squares.every(square => square !== null)) return 'Draw';
-                return null;
-            };
-
-            useEffect(() => {
-                if (winner) {
-                    if (winner === 'Draw') setStatusMessage('Ничья!');
-                    else setStatusMessage(`Победил ${winner}!`);
-                } else {
-                    setStatusMessage(`Ход игрока ${isXTurn ? 'X' : 'O'}`);
-                }
-            }, [winner, isXTurn]);
-
-            const handleClick = (index) => {
-                if (board[index] || winner) return;
-                const newBoard = [...board];
-                newBoard[index] = isXTurn ? 'X' : 'O';
-                setBoard(newBoard);
-                const gameWinner = calculateWinner(newBoard);
-                if (gameWinner) setWinner(gameWinner);
-                else setIsXTurn(!isXTurn);
-            };
-
-            const resetGame = () => {
-                setBoard(Array(9).fill(null));
-                setIsXTurn(true);
-                setWinner(null);
-                setStatusMessage('Ход игрока X');
-                setGameAnalysis(''); // Сброс анализа при новой игре
-                setAnalysisError('');
-            };
-
-            const handleAnalyzeGame = async () => {
-                if (!winner) return;
-                setIsAnalyzingGame(true);
-                setGameAnalysis('');
-                setAnalysisError('');
-                const boardString = board.map(cell => cell || '_').join(', ');
-                const prompt = `Ты — веселый спортивный комментатор. Только что завершилась партия в крестики-нолики. Результат: ${winner === 'Draw' ? 'Ничья' : `Победил ${winner}`}. Финальное состояние доски (пустые клетки обозначены '_'): ${boardString}. Напиши очень короткий (1-2 предложения), забавный или едкий комментарий об этой эпической битве.`;
                 try {
-                    const analysis = await generateTextFromGemini(prompt);
-                    setGameAnalysis(analysis);
-                } catch (error) {
-                    setAnalysisError(`Ошибка анализа: ${error.message}`);
-                    console.error("Ошибка при анализе игры:", error);
-                } finally {
-                    setIsAnalyzingGame(false);
-                }
-            };
-
-            return (
-                <div className="tic-tac-toe-game">
-                    <div className="status">{statusMessage}</div>
-                    <div className="board">
-                        {board.map((cell, index) => (
-                            <button
-                                key={index}
-                                className="cell"
-                                onClick={() => handleClick(index)}
-                                disabled={!!cell || !!winner}
-                            >
-                                {cell}
-                            </button>
-                        ))}
-                    </div>
-                    {winner && (
-                        <div className="winner-section">
-                            <div className={`winner ${winner === 'Draw' ? 'draw' : ''}`}>
-                                {/* Статус победителя уже отображается в statusMessage */}
-                            </div>
-                            <button onClick={resetGame}>Новая игра</button>
-                            <div className="gemini-feature" style={{ marginTop: '10px' }}>
-                                <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame}>
-                                    {isAnalyzingGame ? 'Анализ...' : '✨ Проанализировать игру'}
-                                </button>
-                                {isAnalyzingGame && <div className="loading-indicator" style={{fontSize: '0.9em', padding: '5px'}}>Идет анализ...</div>}
-                                {analysisError && <div className="error-indicator" style={{fontSize: '0.9em', padding: '5px'}}>{analysisError}</div>}
-                                {gameAnalysis && !isAnalyzingGame && <div className="gemini-analysis">{gameAnalysis}</div>}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        // --- Компонент Чата ---
-        const Chat = ({ conversationId }) => {
-            const [newMessage, setNewMessage] = useState('');
-            const [selectedImageFile, setSelectedImageFile] = useState(null);
-            const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-            const [replyTo, setReplyTo] = useState(null); 
-            const [isGeneratingPhrase, setIsGeneratingPhrase] = useState(false);
-            const [phraseError, setPhraseError] = useState('');
-
-
-            const fileInputRef = useRef(null);
-            const messagesEndRef = useRef(null);
-            const tanQueryClient = useTanQueryClient();
-
-            const fetchMessages = async () => {
-                const response = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`);
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ message: 'Не удалось получить детали ошибки' }));
-                    throw new Error(`Ошибка загрузки сообщений: ${response.status} - ${errorData.message || response.statusText}`);
-                }
-                return response.json();
-            };
-
-            const { data: messages = [], error, isLoading } = useQuery(
-                ['messages', conversationId],
-                fetchMessages,
-                { onError: (err) => console.error('Ошибка React Query (fetchMessages):', err.message) }
-            );
-
-            const sendMessageMutation = useMutation(
-                async (formData) => {
-                    const response = await fetch(`${API_BASE_URL}/api/send-message`, {
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
-                        body: formData,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error("Gemini API Error Response:", errorData);
+                        const message = errorData.error?.message || response.statusText;
+                        if (response.status === 429) { 
+                            throw new Error(`Слишком много запросов к Gemini API. Попробуйте позже. (${response.status})`);
+                        }
+                        throw new Error(`Ошибка Gemini API: ${message} (${response.status})`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        return result.candidates[0].content.parts[0].text.trim();
+                    } else {
+                        console.error("Неожиданная структура ответа Gemini API:", result);
+                        if (result.promptFeedback && result.promptFeedback.blockReason) {
+                            throw new Error(`Запрос к Gemini был заблокирован: ${result.promptFeedback.blockReason} ${result.promptFeedback.blockReasonMessage || ''}. Пожалуйста, измените запрос.`);
+                        }
+                        throw new Error("Не удалось получить текст из ответа Gemini.");
+                    }
+                } catch (error) {
+                    console.error('Ошибка вызова Gemini API:', error);
+                    throw error; 
+                }
+            }
+
+
+            // --- Компонент игры "Крестики-Нолики" ---
+            const TicTacToeGame = () => {
+                const [board, setBoard] = useState(Array(9).fill(null));
+                const [isXTurn, setIsXTurn] = useState(true);
+                const [winner, setWinner] = useState(null);
+                const [statusMessage, setStatusMessage] = useState('Ход игрока X');
+                const [gameAnalysis, setGameAnalysis] = useState('');
+                const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
+                const [analysisError, setAnalysisError] = useState('');
+
+                const calculateWinner = (squares) => {
+                    const lines = [
+                        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                        [0, 4, 8], [2, 4, 6],
+                    ];
+                    for (let i = 0; i < lines.length; i++) {
+                        const [a, b, c] = lines[i];
+                        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                            return squares[a];
+                        }
+                    }
+                    if (squares.every(square => square !== null)) return 'Draw';
+                    return null;
+                };
+
+                useEffect(() => {
+                    if (winner) {
+                        if (winner === 'Draw') setStatusMessage('Ничья!');
+                        else setStatusMessage(`Победил ${winner}!`);
+                    } else {
+                        setStatusMessage(`Ход игрока ${isXTurn ? 'X' : 'O'}`);
+                    }
+                }, [winner, isXTurn]);
+
+                const handleClick = (index) => {
+                    if (board[index] || winner) return;
+                    const newBoard = [...board];
+                    newBoard[index] = isXTurn ? 'X' : 'O';
+                    setBoard(newBoard);
+                    const gameWinner = calculateWinner(newBoard);
+                    if (gameWinner) setWinner(gameWinner);
+                    else setIsXTurn(!isXTurn);
+                };
+
+                const resetGame = () => {
+                    setBoard(Array(9).fill(null));
+                    setIsXTurn(true);
+                    setWinner(null);
+                    setStatusMessage('Ход игрока X');
+                    setGameAnalysis('');
+                    setAnalysisError('');
+                };
+
+                const handleAnalyzeGame = async () => {
+                    if (!winner) return;
+                    setIsAnalyzingGame(true);
+                    setGameAnalysis('');
+                    setAnalysisError('');
+                    const boardString = board.map(cell => cell || '_').join(', ');
+                    const prompt = `Ты — веселый спортивный комментатор. Только что завершилась партия в крестики-нолики. Результат: ${winner === 'Draw' ? 'Ничья' : `Победил ${winner}`}. Финальное состояние доски (пустые клетки обозначены '_'): ${boardString}. Напиши очень короткий (1-2 предложения), забавный или едкий комментарий об этой эпической битве.`;
+                    try {
+                        const analysis = await generateTextFromGemini(prompt);
+                        setGameAnalysis(analysis);
+                    } catch (error) {
+                        setAnalysisError(`Ошибка анализа: ${error.message}`);
+                        console.error("Ошибка при анализе игры:", error);
+                    } finally {
+                        setIsAnalyzingGame(false);
+                    }
+                };
+
+                return (
+                    <div className="tic-tac-toe-game">
+                        <div className="status">{statusMessage}</div>
+                        <div className="board">
+                            {board.map((cell, index) => (
+                                <button
+                                    key={index}
+                                    className="cell"
+                                    onClick={() => handleClick(index)}
+                                    disabled={!!cell || !!winner}
+                                >
+                                    {cell}
+                                </button>
+                            ))}
+                        </div>
+                        {winner && (
+                            <div className="winner-section">
+                                <div className={`winner ${winner === 'Draw' ? 'draw' : ''}`}>
+                                </div>
+                                <button onClick={resetGame}>Новая игра</button>
+                                <div className="gemini-feature" style={{ marginTop: '10px' }}>
+                                    <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame}>
+                                        {isAnalyzingGame ? 'Анализ...' : '✨ Проанализировать игру'}
+                                    </button>
+                                    {isAnalyzingGame && <div className="loading-indicator" style={{fontSize: '0.9em', padding: '5px'}}>Идет анализ...</div>}
+                                    {analysisError && <div className="error-indicator" style={{fontSize: '0.9em', padding: '5px'}}>{analysisError}</div>}
+                                    {gameAnalysis && !isAnalyzingGame && <div className="gemini-analysis">{gameAnalysis}</div>}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            // --- Компонент Чата ---
+            const Chat = ({ conversationId }) => {
+                const [newMessage, setNewMessage] = useState('');
+                const [selectedImageFile, setSelectedImageFile] = useState(null);
+                const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+                const [replyTo, setReplyTo] = useState(null); 
+                const [isGeneratingPhrase, setIsGeneratingPhrase] = useState(false);
+                const [phraseError, setPhraseError] = useState('');
+
+                const fileInputRef = useRef(null);
+                const messagesEndRef = useRef(null);
+                const tanQueryClient = useTanQueryClient();
+
+                const fetchMessages = async () => {
+                    const response = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`);
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({ message: 'Не удалось получить детали ошибки' }));
-                        throw new Error(`Ошибка отправки сообщения: ${response.status} - ${errorData.message || response.statusText}`);
+                        throw new Error(`Ошибка загрузки сообщений: ${response.status} - ${errorData.message || response.statusText}`);
                     }
                     return response.json();
-                },
-                {
-                    onSuccess: () => tanQueryClient.invalidateQueries(['messages', conversationId]),
-                    onError: (err) => {
-                        console.error('Ошибка React Query (sendMessage):', err.message);
-                        alert(`Не удалось отправить сообщение: ${err.message}`);
+                };
+
+                const { data: messages = [], error, isLoading } = useQuery(
+                    ['messages', conversationId],
+                    fetchMessages,
+                    { onError: (err) => console.error('Ошибка React Query (fetchMessages):', err.message) }
+                );
+
+                const sendMessageMutation = useMutation(
+                    async (formData) => {
+                        const response = await fetch(`${API_BASE_URL}/api/send-message`, {
+                            method: 'POST',
+                            body: formData,
+                        });
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ message: 'Не удалось получить детали ошибки' }));
+                            throw new Error(`Ошибка отправки сообщения: ${response.status} - ${errorData.message || response.statusText}`);
+                        }
+                        return response.json();
+                    },
+                    {
+                        onSuccess: () => tanQueryClient.invalidateQueries(['messages', conversationId]),
+                        onError: (err) => {
+                            console.error('Ошибка React Query (sendMessage):', err.message);
+                            alert(`Не удалось отправить сообщение: ${err.message}`);
+                        }
                     }
-                }
-            );
+                );
 
-            useEffect(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, [messages]);
+                useEffect(() => {
+                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, [messages]);
 
-            const swipeHandlers = useSwipeable({
-                onSwipedRight: (eventData) => {
-                    // Проверяем, существует ли window.ReactSwipeable и useSwipeable перед использованием
-                    if (window.ReactSwipeable && window.ReactSwipeable.useSwipeable) {
+                // Проверяем наличие useSwipeable перед использованием
+                const handlers = useSwipeable ? useSwipeable({
+                    onSwipedRight: (eventData) => {
                         const messageId = eventData.event.target.closest('.message')?.dataset.messageId;
                         if (messageId) {
                             const message = messages.find((msg) => msg._id === messageId || msg.id === messageId);
                             if (message) setReplyTo(message);
                         }
-                    } else {
-                        console.warn("ReactSwipeable или useSwipeable не определены. Свайп может не работать.");
+                    },
+                    trackMouse: true,
+                    preventScrollOnSwipe: true,
+                }) : {}; // Если useSwipeable не определен, передаем пустой объект
+
+                const handleImageChange = (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                        setSelectedImageFile(file);
+                        setImagePreviewUrl(URL.createObjectURL(file));
                     }
-                },
-                trackMouse: true,
-                preventScrollOnSwipe: true,
-            });
+                };
+                
+                const removeSelectedImage = () => {
+                    setSelectedImageFile(null);
+                    setImagePreviewUrl(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                };
 
-            const handleImageChange = (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                    setSelectedImageFile(file);
-                    setImagePreviewUrl(URL.createObjectURL(file));
+                const handleSend = () => {
+                    if (!newMessage.trim() && !selectedImageFile) return;
+                    const formData = new FormData();
+                    if (selectedImageFile) formData.append('image', selectedImageFile);
+                    formData.append('text', newMessage);
+                    formData.append('userId', 'currentUser'); 
+                    formData.append('conversationId', conversationId);
+                    if (replyTo) formData.append('replyToId', replyTo._id || replyTo.id);
+                    sendMessageMutation.mutate(formData);
+                    setNewMessage('');
+                    removeSelectedImage();
+                    setReplyTo(null);
+                };
+                
+                const triggerFileInput = () => fileInputRef.current?.click();
+
+                const handleGenerateChatMessage = async () => {
+                    setIsGeneratingPhrase(true);
+                    setPhraseError('');
+                    const prompt = "Придумай короткую (несколько слов), забавную или немного дерзкую фразу, которую можно отправить в чат во время игры в крестики-нолики. Будь креативным!";
+                    try {
+                        const phrase = await generateTextFromGemini(prompt);
+                        setNewMessage(phrase); 
+                    } catch (error) {
+                        setPhraseError(`Ошибка генерации: ${error.message}`);
+                        console.error("Ошибка при генерации фразы для чата:", error);
+                    } finally {
+                        setIsGeneratingPhrase(false);
+                    }
+                };
+
+                if (!useSwipeable) {
+                    console.warn("Хук useSwipeable не доступен. Функция свайпа будет отключена.");
                 }
-            };
-            
-            const removeSelectedImage = () => {
-                setSelectedImageFile(null);
-                setImagePreviewUrl(null);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-            };
 
-            const handleSend = () => {
-                if (!newMessage.trim() && !selectedImageFile) return;
-                const formData = new FormData();
-                if (selectedImageFile) formData.append('image', selectedImageFile);
-                formData.append('text', newMessage);
-                formData.append('userId', 'currentUser'); 
-                formData.append('conversationId', conversationId);
-                if (replyTo) formData.append('replyToId', replyTo._id || replyTo.id);
-                sendMessageMutation.mutate(formData);
-                setNewMessage('');
-                removeSelectedImage();
-                setReplyTo(null);
-            };
-            
-            const triggerFileInput = () => fileInputRef.current?.click();
+                if (isLoading) return <div className="loading-indicator">Загрузка сообщений...</div>;
+                if (error) return <div className="error-indicator">Ошибка чата: {error.message}</div>;
 
-            const handleGenerateChatMessage = async () => {
-                setIsGeneratingPhrase(true);
-                setPhraseError('');
-                const prompt = "Придумай короткую (несколько слов), забавную или немного дерзкую фразу, которую можно отправить в чат во время игры в крестики-нолики. Будь креативным!";
-                try {
-                    const phrase = await generateTextFromGemini(prompt);
-                    setNewMessage(phrase); // Сразу вставляем в поле ввода
-                } catch (error) {
-                    setPhraseError(`Ошибка генерации: ${error.message}`);
-                    console.error("Ошибка при генерации фразы для чата:", error);
-                } finally {
-                    setIsGeneratingPhrase(false);
-                }
-            };
-
-
-            if (isLoading) return <div className="loading-indicator">Загрузка сообщений...</div>;
-            if (error) return <div className="error-indicator">Ошибка чата: {error.message}</div>;
-
-            return (
-                <div className="chat-container">
-                    <div className="chat-messages" {...swipeHandlers}>
-                        {messages.map((msg) => (
-                            <div
-                                key={msg._id || msg.id}
-                                className={`message ${msg.userId === 'currentUser' ? 'sent' : 'received'}`}
-                                data-message-id={msg._id || msg.id}
-                            >
-                                {msg.replyToId && messages.find(m => (m._id || m.id) === msg.replyToId) && (
-                                    <div className="reply-preview" style={{backgroundColor: 'rgba(0,0,0,0.05)', padding: '5px', marginBottom: '5px', borderRadius: '5px', fontSize: '0.8em'}}>
-                                        <i>Ответ на: {messages.find(m => (m._id || m.id) === msg.replyToId)?.text?.substring(0,30) || 'Изображение'}...</i>
-                                    </div>
-                                )}
-                                {msg.text && <p>{msg.text}</p>}
-                                {msg.imageUrl && (
-                                    <img
-                                        src={msg.imageUrl.startsWith('http') ? msg.imageUrl : `${API_BASE_URL}${msg.imageUrl}`}
-                                        alt="Изображение в сообщении"
-                                        onError={(e) => {
-                                            console.error('Ошибка загрузки изображения:', msg.imageUrl);
-                                            e.target.alt = 'Не удалось загрузить изображение';
-                                            e.target.src = 'https://placehold.co/200x100/eee/ccc?text=Ошибка';
-                                        }}
-                                    />
-                                )}
+                return (
+                    <div className="chat-container">
+                        <div className="chat-messages" {...handlers}>
+                            {messages.map((msg) => (
+                                <div
+                                    key={msg._id || msg.id}
+                                    className={`message ${msg.userId === 'currentUser' ? 'sent' : 'received'}`}
+                                    data-message-id={msg._id || msg.id}
+                                >
+                                    {msg.replyToId && messages.find(m => (m._id || m.id) === msg.replyToId) && (
+                                        <div className="reply-preview" style={{backgroundColor: 'rgba(0,0,0,0.05)', padding: '5px', marginBottom: '5px', borderRadius: '5px', fontSize: '0.8em'}}>
+                                            <i>Ответ на: {messages.find(m => (m._id || m.id) === msg.replyToId)?.text?.substring(0,30) || 'Изображение'}...</i>
+                                        </div>
+                                    )}
+                                    {msg.text && <p>{msg.text}</p>}
+                                    {msg.imageUrl && (
+                                        <img
+                                            src={msg.imageUrl.startsWith('http') ? msg.imageUrl : `${API_BASE_URL}${msg.imageUrl}`}
+                                            alt="Изображение в сообщении"
+                                            onError={(e) => {
+                                                console.error('Ошибка загрузки изображения:', msg.imageUrl);
+                                                e.target.alt = 'Не удалось загрузить изображение';
+                                                e.target.src = 'https://placehold.co/200x100/eee/ccc?text=Ошибка';
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                            <div ref={messagesEndRef} />
+                        </div>
+                        <div className="chat-input-area">
+                            {replyTo && (
+                                <div className="reply-preview">
+                                    <span>Ответ на: {replyTo.text?.substring(0, 30) || 'Изображение'}...</span>
+                                    <button onClick={() => setReplyTo(null)}>✕</button>
+                                </div>
+                            )}
+                            {imagePreviewUrl && (
+                                <div className="image-preview-container">
+                                    <img src={imagePreviewUrl} alt="Предпросмотр изображения" />
+                                    <button onClick={removeSelectedImage} className="remove-image-btn">✕</button>
+                                </div>
+                            )}
+                            {phraseError && <div className="error-indicator" style={{fontSize: '0.9em', paddingBottom: '5px'}}>{phraseError}</div>}
+                            <div className="chat-input-controls">
+                                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
+                                <button type="button" onClick={triggerFileInput} className="file-upload-label" title="Прикрепить изображение">📎</button>
+                                <input
+                                    type="text"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    placeholder={isGeneratingPhrase ? "✨ Думаю..." : "Напишите сообщение..."}
+                                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey ? (handleSend(), e.preventDefault()) : null}
+                                    disabled={isGeneratingPhrase}
+                                />
+                                <button onClick={handleGenerateChatMessage} disabled={isGeneratingPhrase} className="gemini-chat-btn" title="✨ Сгенерировать фразу">
+                                    {isGeneratingPhrase ? '...' : '✨'}
+                                </button>
+                                <button onClick={handleSend} disabled={sendMessageMutation.isLoading || isGeneratingPhrase}>
+                                    {sendMessageMutation.isLoading ? '...' : '➤'}
+                                </button>
                             </div>
-                        ))}
-                        <div ref={messagesEndRef} />
-                    </div>
-                    <div className="chat-input-area">
-                        {replyTo && (
-                            <div className="reply-preview">
-                                <span>Ответ на: {replyTo.text?.substring(0, 30) || 'Изображение'}...</span>
-                                <button onClick={() => setReplyTo(null)}>✕</button>
-                            </div>
-                        )}
-                        {imagePreviewUrl && (
-                            <div className="image-preview-container">
-                                <img src={imagePreviewUrl} alt="Предпросмотр изображения" />
-                                <button onClick={removeSelectedImage} className="remove-image-btn">✕</button>
-                            </div>
-                        )}
-                        {phraseError && <div className="error-indicator" style={{fontSize: '0.9em', paddingBottom: '5px'}}>{phraseError}</div>}
-                        <div className="chat-input-controls">
-                            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
-                            <button type="button" onClick={triggerFileInput} className="file-upload-label" title="Прикрепить изображение">📎</button>
-                            <input
-                                type="text"
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                placeholder={isGeneratingPhrase ? "✨ Думаю..." : "Напишите сообщение..."}
-                                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey ? (handleSend(), e.preventDefault()) : null}
-                                disabled={isGeneratingPhrase}
-                            />
-                            <button onClick={handleGenerateChatMessage} disabled={isGeneratingPhrase} className="gemini-chat-btn" title="✨ Сгенерировать фразу">
-                                {isGeneratingPhrase ? '...' : '✨'}
-                            </button>
-                            <button onClick={handleSend} disabled={sendMessageMutation.isLoading || isGeneratingPhrase}>
-                                {sendMessageMutation.isLoading ? '...' : '➤'}
-                            </button>
                         </div>
                     </div>
-                </div>
-            );
+                );
+            };
+
+            const App = () => {
+                const [queryClient] = useState(() => new QueryClient({
+                    defaultOptions: {
+                        queries: { refetchOnWindowFocus: false, retry: 1 },
+                    },
+                }));
+
+                return (
+                    <StrictMode>
+                        <QueryClientProvider client={queryClient}>
+                            <div className="app-container">
+                                <h1>Крестики-Нолики</h1>
+                                <TicTacToeGame />
+                                <h2 className="chat-section-title">Общий чат</h2>
+                                <Chat conversationId="global-game-chat" />
+                            </div>
+                        </QueryClientProvider>
+                    </StrictMode>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
         };
-
-        const App = () => {
-            const [queryClient] = useState(() => new QueryClient({
-                 defaultOptions: {
-                    queries: { refetchOnWindowFocus: false, retry: 1 },
-                },
-            }));
-
-            return (
-                <StrictMode>
-                    <QueryClientProvider client={queryClient}>
-                        <div className="app-container">
-                            <h1>Крестики-Нолики</h1>
-                            <TicTacToeGame />
-                            <h2 className="chat-section-title">Общий чат</h2>
-                            <Chat conversationId="global-game-chat" />
-                        </div>
-                    </QueryClientProvider>
-                </StrictMode>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-
     </script>
 </body>
 </html>
