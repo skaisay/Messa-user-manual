@@ -1,54 +1,760 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Day/Night Mode Toggle with Illustrated Design</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Крестики-Нолики Расширение</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+    <script src="https://unpkg.com/@tanstack/react-query@4.36.1/build/umd/index.production.js"></script>
+    <script src="https://unpkg.com/react-swipeable@7.0.1/lib/umd/react-swipeable.min.js"></script>
+
+    <style>
+        /* Общие стили и сброс */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            width: 420px; 
+            overflow-x: hidden;
+        }
+
+        #root {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        button:hover:not(:disabled) {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        input[type="text"], input[type="file"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        /* Стили из App.css */
+        .app-container {
+            width: 100%;
+            max-width: 400px; 
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin: 10px;
+        }
+
+        .app-container h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 25px auto;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .cell {
+            width: 100%; 
+            aspect-ratio: 1 / 1; 
+            font-size: 2.5em; 
+            font-weight: bold;
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #34495e;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .cell:hover:not(:disabled) {
+            background: #dfe6e9;
+            transform: scale(1.03);
+        }
+        .cell:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .winner-section { /* Общий контейнер для результатов игры и кнопки анализа */
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .winner {
+            font-size: 1.5em;
+            color: #27ae60;
+            font-weight: 500;
+            margin-bottom: 10px; /* Отступ перед кнопкой "Новая игра" */
+        }
+        .winner.draw {
+            color: #f39c12;
+        }
+
+        .winner-section button, .gemini-feature button {
+            margin-top: 10px;
+            padding: 10px 20px; /* Уменьшил паддинг для кнопок Gemini */
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em; /* Уменьшил шрифт для кнопок Gemini */
+        }
+        .winner-section button:hover, .gemini-feature button:hover:not(:disabled) {
+            background: #2980b9;
+        }
+        .gemini-feature button {
+            background-color: #9b59b6; /* Фиолетовый для Gemini */
+        }
+        .gemini-feature button:hover:not(:disabled) {
+            background-color: #8e44ad;
+        }
+
+
+        .status {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+            height: 20px; 
+        }
+        
+        .gemini-analysis {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f0e6f6;
+            border-radius: 8px;
+            font-style: italic;
+            color: #5b327c;
+            border: 1px solid #d8bfde;
+            font-size: 0.95em;
+            min-height: 30px;
+        }
+
+
+        /* Стили из Chat.css */
+        .chat-section-title {
+            text-align: center;
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 350px; 
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            margin-top: 20px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-messages::-webkit-scrollbar { width: 8px; }
+        .chat-messages::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 10px; }
+        .chat-messages::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 75%;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: relative; 
+        }
+        .message p { margin: 0; line-height: 1.4; }
+        .message img {
+            max-width: 100%;
+            max-height: 150px; 
+            border-radius: 10px;
+            margin-top: 5px;
+            display: block;
+            background-color: #eee; 
+        }
+
+        .message.sent {
+            background: #3498db; 
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px; 
+        }
+
+        .message.received {
+            background: #e9ecef; 
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 5px; 
+        }
+        
+        .message-meta {
+            font-size: 0.75em;
+            color: rgba(0,0,0,0.5);
+            margin-top: 5px;
+        }
+        .message.sent .message-meta { color: rgba(255,255,255,0.7); }
+
+
+        .chat-input-area { 
+            padding: 15px;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-input-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input-controls input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 20px; 
+            font-size: 15px;
+        }
+        .chat-input-controls input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .chat-input-controls button { /* Кнопка отправки и генерации фразы */
+            padding: 10px 15px; /* Уменьшил для компактности */
+            background: #2ecc71; 
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px; /* Уменьшил шрифт */
+            font-weight: 500;
+            min-width: 40px; /* Минимальная ширина для иконок */
+            text-align: center;
+        }
+        .chat-input-controls button.gemini-chat-btn { /* Отдельный стиль для кнопки Gemini в чате */
+             background: #9b59b6; /* Фиолетовый */
+        }
+        .chat-input-controls button.gemini-chat-btn:hover:not(:disabled) {
+            background: #8e44ad;
+        }
+        .chat-input-controls button:hover:not(:disabled) {
+            background: #27ae60;
+        }
+        
+        .chat-input-controls input[type="file"] { display: none; }
+        .file-upload-label {
+            padding: 10px 12px;
+            background-color: #f0f0f0;
+            color: #555;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            line-height: 1; /* Для выравнивания иконки */
+        }
+        .file-upload-label:hover { background-color: #e0e0e0; }
+
+
+        .reply-preview {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #3498db;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .reply-preview span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
+        }
+        .reply-preview button { 
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.2em;
+            padding: 0 5px;
+            box-shadow: none;
+        }
+        .reply-preview button:hover { color: #333; }
+
+        .image-preview-container {
+            position: relative;
+            margin-bottom: 10px;
+            max-width: 150px; 
+        }
+        .image-preview-container img {
+            max-width: 100%;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: block;
+        }
+        .remove-image-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0;
+            box-shadow: none;
+        }
+        .loading-indicator, .error-indicator {
+            text-align: center;
+            padding: 10px; /* Уменьшил паддинг */
+            font-size: 1em; /* Уменьшил шрифт */
+            color: #7f8c8d;
+        }
+        .error-indicator { color: #e74c3c; }
+
+    </style>
 </head>
 <body>
-    <div class="container">
-        <label class="theme-switch">
-            <input class="theme-switch__checkbox" type="checkbox" />
-            <div class="theme-switch__container">
-              <div class="theme-switch__clouds"></div>
-              <div class="theme-switch__stars-container">
-                <svg fill="none" viewBox="0 0 144 55" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fill="currentColor"
-                    d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z"
-                    clip-rule="evenodd"
-                    fill-rule="evenodd"
-                  ></path>
-                </svg>
-              </div>
-              <div class="theme-switch__circle-container">
-                <div class="theme-switch__sun-moon-container">
-                  <div class="theme-switch__moon">
-                    <div class="theme-switch__spot"></div>
-                    <div class="theme-switch__spot"></div>
-                    <div class="theme-switch__spot"></div>
-                  </div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Замените на URL вашего реального сервера для чата
+        const API_BASE_URL = 'http://localhost:3000'; 
+        // const API_BASE_URL = 'https://your-replit-project-name.repl.co';
+
+        const { useState, useEffect, useRef, StrictMode } = React;
+        const { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient: useTanQueryClient } = ReactQuery; 
+        const { useSwipeable } = window.ReactSwipeable; // ИЗМЕНЕНИЕ: Явно указываем window.ReactSwipeable
+
+        // --- Gemini API Helper ---
+        async function generateTextFromGemini(promptText) {
+            const apiKey = ""; // API ключ будет обработан средой Canvas
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [{ text: promptText }]
+                }],
+                 generationConfig: { // Добавим конфигурацию для контроля вывода
+                  temperature: 0.7,
+                  maxOutputTokens: 150, // Ограничим длину ответа
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error("Gemini API Error Response:", errorData);
+                    const message = errorData.error?.message || response.statusText;
+                    if (response.status === 429) { // Слишком много запросов
+                         throw new Error(`Слишком много запросов к Gemini API. Попробуйте позже. (${response.status})`);
+                    }
+                    throw new Error(`Ошибка Gemini API: ${message} (${response.status})`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text.trim();
+                } else {
+                    console.error("Неожиданная структура ответа Gemini API:", result);
+                    if (result.promptFeedback && result.promptFeedback.blockReason) {
+                         throw new Error(`Запрос к Gemini был заблокирован: ${result.promptFeedback.blockReason} ${result.promptFeedback.blockReasonMessage || ''}. Пожалуйста, измените запрос.`);
+                    }
+                    throw new Error("Не удалось получить текст из ответа Gemini.");
+                }
+            } catch (error) {
+                console.error('Ошибка вызова Gemini API:', error);
+                throw error; 
+            }
+        }
+
+
+        // --- Компонент игры "Крестики-Нолики" ---
+        const TicTacToeGame = () => {
+            const [board, setBoard] = useState(Array(9).fill(null));
+            const [isXTurn, setIsXTurn] = useState(true);
+            const [winner, setWinner] = useState(null);
+            const [statusMessage, setStatusMessage] = useState('Ход игрока X');
+
+            // Состояния для Gemini анализа игры
+            const [gameAnalysis, setGameAnalysis] = useState('');
+            const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
+            const [analysisError, setAnalysisError] = useState('');
+
+            const calculateWinner = (squares) => {
+                const lines = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                    [0, 4, 8], [2, 4, 6],
+                ];
+                for (let i = 0; i < lines.length; i++) {
+                    const [a, b, c] = lines[i];
+                    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                        return squares[a];
+                    }
+                }
+                if (squares.every(square => square !== null)) return 'Draw';
+                return null;
+            };
+
+            useEffect(() => {
+                if (winner) {
+                    if (winner === 'Draw') setStatusMessage('Ничья!');
+                    else setStatusMessage(`Победил ${winner}!`);
+                } else {
+                    setStatusMessage(`Ход игрока ${isXTurn ? 'X' : 'O'}`);
+                }
+            }, [winner, isXTurn]);
+
+            const handleClick = (index) => {
+                if (board[index] || winner) return;
+                const newBoard = [...board];
+                newBoard[index] = isXTurn ? 'X' : 'O';
+                setBoard(newBoard);
+                const gameWinner = calculateWinner(newBoard);
+                if (gameWinner) setWinner(gameWinner);
+                else setIsXTurn(!isXTurn);
+            };
+
+            const resetGame = () => {
+                setBoard(Array(9).fill(null));
+                setIsXTurn(true);
+                setWinner(null);
+                setStatusMessage('Ход игрока X');
+                setGameAnalysis(''); // Сброс анализа при новой игре
+                setAnalysisError('');
+            };
+
+            const handleAnalyzeGame = async () => {
+                if (!winner) return;
+                setIsAnalyzingGame(true);
+                setGameAnalysis('');
+                setAnalysisError('');
+                const boardString = board.map(cell => cell || '_').join(', ');
+                const prompt = `Ты — веселый спортивный комментатор. Только что завершилась партия в крестики-нолики. Результат: ${winner === 'Draw' ? 'Ничья' : `Победил ${winner}`}. Финальное состояние доски (пустые клетки обозначены '_'): ${boardString}. Напиши очень короткий (1-2 предложения), забавный или едкий комментарий об этой эпической битве.`;
+                try {
+                    const analysis = await generateTextFromGemini(prompt);
+                    setGameAnalysis(analysis);
+                } catch (error) {
+                    setAnalysisError(`Ошибка анализа: ${error.message}`);
+                    console.error("Ошибка при анализе игры:", error);
+                } finally {
+                    setIsAnalyzingGame(false);
+                }
+            };
+
+            return (
+                <div className="tic-tac-toe-game">
+                    <div className="status">{statusMessage}</div>
+                    <div className="board">
+                        {board.map((cell, index) => (
+                            <button
+                                key={index}
+                                className="cell"
+                                onClick={() => handleClick(index)}
+                                disabled={!!cell || !!winner}
+                            >
+                                {cell}
+                            </button>
+                        ))}
+                    </div>
+                    {winner && (
+                        <div className="winner-section">
+                            <div className={`winner ${winner === 'Draw' ? 'draw' : ''}`}>
+                                {/* Статус победителя уже отображается в statusMessage */}
+                            </div>
+                            <button onClick={resetGame}>Новая игра</button>
+                            <div className="gemini-feature" style={{ marginTop: '10px' }}>
+                                <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame}>
+                                    {isAnalyzingGame ? 'Анализ...' : '✨ Проанализировать игру'}
+                                </button>
+                                {isAnalyzingGame && <div className="loading-indicator" style={{fontSize: '0.9em', padding: '5px'}}>Идет анализ...</div>}
+                                {analysisError && <div className="error-indicator" style={{fontSize: '0.9em', padding: '5px'}}>{analysisError}</div>}
+                                {gameAnalysis && !isAnalyzingGame && <div className="gemini-analysis">{gameAnalysis}</div>}
+                            </div>
+                        </div>
+                    )}
                 </div>
-              </div>
-              <div class="theme-switch__shooting-star"></div>
-              <div class="theme-switch__shooting-star-2"></div>
-              <div class="theme-switch__meteor"></div>
-              <div class="theme-switch__stars-cluster">
-                <div class="star"></div>
-                <div class="star"></div>
-                <div class="star"></div>
-                <div class="star"></div>
-                <div class="star"></div>
-              </div>
-              <div class="theme-switch__aurora"></div>
-              <div class="theme-switch__comets">
-                <div class="comet"></div>
-                <div class="comet"></div>
-              </div>
-            </div>
-          </label>
-          
-    </div>
+            );
+        };
+
+        // --- Компонент Чата ---
+        const Chat = ({ conversationId }) => {
+            const [newMessage, setNewMessage] = useState('');
+            const [selectedImageFile, setSelectedImageFile] = useState(null);
+            const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+            const [replyTo, setReplyTo] = useState(null); 
+            const [isGeneratingPhrase, setIsGeneratingPhrase] = useState(false);
+            const [phraseError, setPhraseError] = useState('');
+
+
+            const fileInputRef = useRef(null);
+            const messagesEndRef = useRef(null);
+            const tanQueryClient = useTanQueryClient();
+
+            const fetchMessages = async () => {
+                const response = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Не удалось получить детали ошибки' }));
+                    throw new Error(`Ошибка загрузки сообщений: ${response.status} - ${errorData.message || response.statusText}`);
+                }
+                return response.json();
+            };
+
+            const { data: messages = [], error, isLoading } = useQuery(
+                ['messages', conversationId],
+                fetchMessages,
+                { onError: (err) => console.error('Ошибка React Query (fetchMessages):', err.message) }
+            );
+
+            const sendMessageMutation = useMutation(
+                async (formData) => {
+                    const response = await fetch(`${API_BASE_URL}/api/send-message`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ message: 'Не удалось получить детали ошибки' }));
+                        throw new Error(`Ошибка отправки сообщения: ${response.status} - ${errorData.message || response.statusText}`);
+                    }
+                    return response.json();
+                },
+                {
+                    onSuccess: () => tanQueryClient.invalidateQueries(['messages', conversationId]),
+                    onError: (err) => {
+                        console.error('Ошибка React Query (sendMessage):', err.message);
+                        alert(`Не удалось отправить сообщение: ${err.message}`);
+                    }
+                }
+            );
+
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
+
+            const swipeHandlers = useSwipeable({
+                onSwipedRight: (eventData) => {
+                    // Проверяем, существует ли window.ReactSwipeable и useSwipeable перед использованием
+                    if (window.ReactSwipeable && window.ReactSwipeable.useSwipeable) {
+                        const messageId = eventData.event.target.closest('.message')?.dataset.messageId;
+                        if (messageId) {
+                            const message = messages.find((msg) => msg._id === messageId || msg.id === messageId);
+                            if (message) setReplyTo(message);
+                        }
+                    } else {
+                        console.warn("ReactSwipeable или useSwipeable не определены. Свайп может не работать.");
+                    }
+                },
+                trackMouse: true,
+                preventScrollOnSwipe: true,
+            });
+
+            const handleImageChange = (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                    setSelectedImageFile(file);
+                    setImagePreviewUrl(URL.createObjectURL(file));
+                }
+            };
+            
+            const removeSelectedImage = () => {
+                setSelectedImageFile(null);
+                setImagePreviewUrl(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+            };
+
+            const handleSend = () => {
+                if (!newMessage.trim() && !selectedImageFile) return;
+                const formData = new FormData();
+                if (selectedImageFile) formData.append('image', selectedImageFile);
+                formData.append('text', newMessage);
+                formData.append('userId', 'currentUser'); 
+                formData.append('conversationId', conversationId);
+                if (replyTo) formData.append('replyToId', replyTo._id || replyTo.id);
+                sendMessageMutation.mutate(formData);
+                setNewMessage('');
+                removeSelectedImage();
+                setReplyTo(null);
+            };
+            
+            const triggerFileInput = () => fileInputRef.current?.click();
+
+            const handleGenerateChatMessage = async () => {
+                setIsGeneratingPhrase(true);
+                setPhraseError('');
+                const prompt = "Придумай короткую (несколько слов), забавную или немного дерзкую фразу, которую можно отправить в чат во время игры в крестики-нолики. Будь креативным!";
+                try {
+                    const phrase = await generateTextFromGemini(prompt);
+                    setNewMessage(phrase); // Сразу вставляем в поле ввода
+                } catch (error) {
+                    setPhraseError(`Ошибка генерации: ${error.message}`);
+                    console.error("Ошибка при генерации фразы для чата:", error);
+                } finally {
+                    setIsGeneratingPhrase(false);
+                }
+            };
+
+
+            if (isLoading) return <div className="loading-indicator">Загрузка сообщений...</div>;
+            if (error) return <div className="error-indicator">Ошибка чата: {error.message}</div>;
+
+            return (
+                <div className="chat-container">
+                    <div className="chat-messages" {...swipeHandlers}>
+                        {messages.map((msg) => (
+                            <div
+                                key={msg._id || msg.id}
+                                className={`message ${msg.userId === 'currentUser' ? 'sent' : 'received'}`}
+                                data-message-id={msg._id || msg.id}
+                            >
+                                {msg.replyToId && messages.find(m => (m._id || m.id) === msg.replyToId) && (
+                                    <div className="reply-preview" style={{backgroundColor: 'rgba(0,0,0,0.05)', padding: '5px', marginBottom: '5px', borderRadius: '5px', fontSize: '0.8em'}}>
+                                        <i>Ответ на: {messages.find(m => (m._id || m.id) === msg.replyToId)?.text?.substring(0,30) || 'Изображение'}...</i>
+                                    </div>
+                                )}
+                                {msg.text && <p>{msg.text}</p>}
+                                {msg.imageUrl && (
+                                    <img
+                                        src={msg.imageUrl.startsWith('http') ? msg.imageUrl : `${API_BASE_URL}${msg.imageUrl}`}
+                                        alt="Изображение в сообщении"
+                                        onError={(e) => {
+                                            console.error('Ошибка загрузки изображения:', msg.imageUrl);
+                                            e.target.alt = 'Не удалось загрузить изображение';
+                                            e.target.src = 'https://placehold.co/200x100/eee/ccc?text=Ошибка';
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </div>
+                    <div className="chat-input-area">
+                        {replyTo && (
+                            <div className="reply-preview">
+                                <span>Ответ на: {replyTo.text?.substring(0, 30) || 'Изображение'}...</span>
+                                <button onClick={() => setReplyTo(null)}>✕</button>
+                            </div>
+                        )}
+                        {imagePreviewUrl && (
+                            <div className="image-preview-container">
+                                <img src={imagePreviewUrl} alt="Предпросмотр изображения" />
+                                <button onClick={removeSelectedImage} className="remove-image-btn">✕</button>
+                            </div>
+                        )}
+                        {phraseError && <div className="error-indicator" style={{fontSize: '0.9em', paddingBottom: '5px'}}>{phraseError}</div>}
+                        <div className="chat-input-controls">
+                            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
+                            <button type="button" onClick={triggerFileInput} className="file-upload-label" title="Прикрепить изображение">📎</button>
+                            <input
+                                type="text"
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                placeholder={isGeneratingPhrase ? "✨ Думаю..." : "Напишите сообщение..."}
+                                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey ? (handleSend(), e.preventDefault()) : null}
+                                disabled={isGeneratingPhrase}
+                            />
+                            <button onClick={handleGenerateChatMessage} disabled={isGeneratingPhrase} className="gemini-chat-btn" title="✨ Сгенерировать фразу">
+                                {isGeneratingPhrase ? '...' : '✨'}
+                            </button>
+                            <button onClick={handleSend} disabled={sendMessageMutation.isLoading || isGeneratingPhrase}>
+                                {sendMessageMutation.isLoading ? '...' : '➤'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [queryClient] = useState(() => new QueryClient({
+                 defaultOptions: {
+                    queries: { refetchOnWindowFocus: false, retry: 1 },
+                },
+            }));
+
+            return (
+                <StrictMode>
+                    <QueryClientProvider client={queryClient}>
+                        <div className="app-container">
+                            <h1>Крестики-Нолики</h1>
+                            <TicTacToeGame />
+                            <h2 className="chat-section-title">Общий чат</h2>
+                            <Chat conversationId="global-game-chat" />
+                        </div>
+                    </QueryClientProvider>
+                </StrictMode>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+    </script>
 </body>
 </html>
