@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Веб-Ассистент</title>
+    
+    <!-- PWA манифест -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Мета-теги для PWA -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Веб-Ассистент">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- Иконки для разных платформ -->
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+    <link rel="apple-touch-icon" href="./icon.svg">
+    <link rel="mask-icon" href="./icon.svg" color="#000000">
+    
+    <link rel="stylesheet" href="./styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Анимированный фон -->
+    <div class="background-animation">
+        <div class="background-loader">
+            <div class="head"></div>
+            <div class="flames">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+            <div class="eye"></div>
+        </div>
+    </div>
+
+    <!-- Основной контейнер приложения -->
+    <div class="app-container">
+        <!-- Шапка чата -->
+        <header class="chat-header" id="chatHeader">
+            <div class="header-left">
+                <button class="wave-loader menu-button" id="menuButton">
+                    <div class="waves"></div>
+                </button>
+            </div>
+            <div class="chat-title" id="chatTitle">Новый чат</div>
+            <button class="new-chat-btn" id="newChatBtn">
+                <i data-feather="edit-3"></i>
+            </button>
+        </header>
+
+        <!-- Основная область чата -->
+        <main class="chat-container">
+            <!-- Область сообщений -->
+            <div class="messages-container" id="messagesContainer">
+            </div>
+
+            <!-- Индикатор загрузки -->
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-dots">
+                    <div class="loading-message-avatar">
+                        <span class="loader"></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Область ввода -->
+        <footer class="input-container">
+            <form class="input-form" id="inputForm">
+                <div class="input-wrapper">
+                    <!-- Поле ввода -->
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Спрашивай что угодно или нажмите на микрофон"
+                        autocomplete="off"
+                        rows="1"
+                    ></textarea>
+
+                    <!-- Кнопка голосового ввода -->
+                    <button type="button" class="voice-button" id="voiceButton" title="Голосовой ввод (нажмите и говорите)">
+                        🎤
+                    </button>
+
+                    <!-- Кнопка отправки -->
+                    <button type="submit" class="send-button" title="Отправить сообщение">
+                        <i data-feather="send"></i>
+                    </button>
+                </div>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Модальное окно голосового взаимодействия -->
+    <div class="voice-modal-overlay" id="voiceModalOverlay">
+        <div class="voice-modal" id="voiceModal">
+            <div class="voice-modal-header">
+                <h3>Голосовое взаимодействие</h3>
+                <button class="close-voice-modal" id="closeVoiceModal">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            
+            <div class="voice-modal-content">
+                <div class="voice-animation">
+                    <div class="voice-circle">
+                        <div class="voice-wave wave1"></div>
+                        <div class="voice-wave wave2"></div>
+                        <div class="voice-wave wave3"></div>
+                        <div class="mic-icon-large">
+                            <i data-feather="mic"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="voice-status" id="voiceStatus">
+                    Нажмите кнопку ниже и говорите
+                </div>
+                
+                <div class="voice-transcript" id="voiceTranscript">
+                    <!-- Здесь будет отображаться распознанный текст -->
+                </div>
+                
+                <div class="voice-controls">
+                    <button class="voice-control-btn start-voice" id="startVoiceBtn">
+                        <i data-feather="mic"></i>
+                        <span>Начать запись</span>
+                    </button>
+                    <button class="voice-control-btn stop-voice" id="stopVoiceBtn" style="display: none;">
+                        <i data-feather="mic-off"></i>
+                        <span>Остановить</span>
+                    </button>
+                    <button class="voice-control-btn send-voice" id="sendVoiceBtn" style="display: none;">
+                        <i data-feather="send"></i>
+                        <span>Отправить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Боковое меню -->
+    <div class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <h3>Профиль</h3>
+            <button class="close-menu-btn" id="closeMenuBtn">
+                <i data-feather="x"></i>
+            </button>
+        </div>
+        
+        <div class="user-profile-preview">
+            <div class="user-avatar" id="userAvatarPreview">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='35' r='20' fill='%236366f1'/><path d='M20 80c0-16.569 13.431-30 30-30s30 13.431 30 30' fill='%236366f1'/></svg>" alt="Avatar" />
+            </div>
+            <div class="user-info">
+                <h4 id="userNameDisplay">Пользователь</h4>
+                <p>Изучаю норвежский</p>
+            </div>
+        </div>
+        
+        <div class="menu-options">
+            <button class="menu-option" id="editProfileBtn">
+                <i data-feather="edit"></i>
+                Редактировать профиль
+            </button>
+            <button class="menu-option" id="statsBtn">
+                <i data-feather="bar-chart-2"></i>
+                Статистика
+            </button>
+            <button class="menu-option" id="settingsBtn">
+                <i data-feather="settings"></i>
+                Настройки
+            </button>
+        </div>
+    </div>
+
+    <!-- Окно редактирования профиля -->
+    <div class="profile-modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактировать профиль</h3>
+                <button class="close-modal-btn" id="closeModalBtn">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="userName">Ваше имя:</label>
+                    <input type="text" id="userName" placeholder="Введите ваше имя" maxlength="20" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Выберите аватар:</label>
+                    <div class="avatar-grid">
+                        <div class="avatar-option" data-avatar="character1">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23667eea'/><stop offset='100%' stop-color='%23764ba2'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g1)'/><circle cx='50' cy='35' r='12' fill='%23ffcc5c'/><circle cx='42' cy='32' r='2' fill='%23333'/><circle cx='58' cy='32' r='2' fill='%23333'/><path d='M40 42 Q50 48 60 42' stroke='%23333' stroke-width='2' fill='none'/><circle cx='50' cy='50' r='2' fill='%23ffcc5c'/><rect x='35' y='65' width='30' height='20' rx='5' fill='%23ff6b6b'/></svg>" alt="Персонаж 1" />
+                        </div>
+                        <div class="avatar-option" data-avatar="character2">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23ff9a9e'/><stop offset='100%' stop-color='%23fecfef'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g2)'/><ellipse cx='50' cy='35' rx='15' ry='12' fill='%23ffcc5c'/><circle cx='43' cy='32' r='2' fill='%23333'/><circle cx='57' cy='32' r='2' fill='%23333'/><path d='M43 40 Q50 44 57 40' stroke='%23333' stroke-width='2' fill='none'/><path d='M25 25 Q35 15 45 25' stroke='%23a0522d' stroke-width='3' fill='none'/><path d='M55 25 Q65 15 75 25' stroke='%23a0522d' stroke-width='3' fill='none'/><rect x='35' y='65' width='30' height='18' rx='5' fill='%234ecdc4'/></svg>" alt="Персонаж 2" />
+                        </div>
+                        <div class="avatar-option" data-avatar="cat">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a8e6cf'/><stop offset='100%' stop-color='%2388d8a3'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g3)'/><ellipse cx='50' cy='45' rx='18' ry='15' fill='%23ff8a80'/><polygon points='35,30 40,15 45,30' fill='%23ff8a80'/><polygon points='55,30 60,15 65,30' fill='%23ff8a80'/><circle cx='43' cy='40' r='2' fill='%23333'/><circle cx='57' cy='40' r='2' fill='%23333'/><ellipse cx='50' cy='48' rx='2' ry='1' fill='%23333'/><path d='M48 50 L50 52 L52 50' stroke='%23333' stroke-width='2' fill='none'/><path d='M40 52 Q50 55 60 52' stroke='%23333' stroke-width='1' fill='none'/></svg>" alt="Котик" />
+                        </div>
+                        <div class="avatar-option" data-avatar="robot">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g4' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2351e5ff'/><stop offset='100%' stop-color='%237c4dff'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g4)'/><rect x='35' y='30' width='30' height='25' rx='3' fill='%23e8eaf6'/><circle cx='42' cy='40' r='3' fill='%234fc3f7'/><circle cx='58' cy='40' r='3' fill='%234fc3f7'/><rect x='47' y='48' width='6' height='4' rx='1' fill='%23333'/><circle cx='50' cy='25' r='3' fill='%23ff5722'/><rect x='20' y='45' width='8' height='3' rx='1' fill='%23ff9800'/><rect x='72' y='45' width='8' height='3' rx='1' fill='%23ff9800'/><rect x='40' y='65' width='20' height='8' rx='2' fill='%23424242'/></svg>" alt="Робот" />
+                        </div>
+                        <div class="avatar-option" data-avatar="galaxy">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><radialGradient id='g5' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='%23667eea'/><stop offset='50%' stop-color='%234a00e0'/><stop offset='100%' stop-color='%23000'/></radialGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g5)'/><circle cx='30' cy='25' r='1' fill='%23fff'/><circle cx='70' cy='30' r='1.5' fill='%23fff'/><circle cx='25' cy='50' r='1' fill='%23fff'/><circle cx='75' cy='65' r='1' fill='%23fff'/><circle cx='60' cy='75' r='1.5' fill='%23fff'/><circle cx='40' cy='70' r='1' fill='%23fff'/><ellipse cx='50' cy='50' rx='20' ry='8' fill='none' stroke='%23ff6b9d' stroke-width='2' opacity='0.8'/><circle cx='50' cy='50' r='6' fill='%23ffd700'/></svg>" alt="Галактика" />
+                        </div>
+                        <div class="avatar-option" data-avatar="gem">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g6' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23ff9a9e'/><stop offset='30%' stop-color='%23fecfef'/><stop offset='60%' stop-color='%23fecfef'/><stop offset='100%' stop-color='%23ff9a9e'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%23000'/><polygon points='50,20 30,40 35,65 50,75 65,65 70,40' fill='url(%23g6)'/><polygon points='50,20 40,35 50,45 60,35' fill='%23fff' opacity='0.7'/><polygon points='30,40 40,50 50,45 35,40' fill='%23fff' opacity='0.3'/><polygon points='70,40 60,50 50,45 65,40' fill='%23fff' opacity='0.3'/></svg>" alt="Кристалл" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelBtn">Отмена</button>
+                <button class="btn-primary" id="saveBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay для модального окна -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- Кастомное контекстное меню -->
+    <div id="customContextMenu" class="custom-context-menu">
+        <button class="context-menu-item" onclick="copyText()">
+            <i data-feather="copy"></i>
+            Копировать
+        </button>
+    </div>
+
+    <!-- Голосовое окно -->
+    <div id="voiceWindow" class="voice-window">
+        <!-- Анимация в центре -->
+        <div class="voice-animation-container">
+            <div class="loader">
+                <div class="loader-before"></div>
+                <div class="loader-after"></div>
+            </div>
+        </div>
+        
+
+        
+        <!-- Голосовые элементы управления внизу -->
+        <div class="voice-controls-container">
+            <button class="voice-mic-button" id="voiceMicButton">
+                <i data-feather="mic"></i>
+            </button>
+            <span class="voice-status" id="voiceStatus">Начните говорить...</span>
+            <button class="voice-close-button" id="voiceCloseButton">
+                <i data-feather="x"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Подключение скриптов -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <script src="./database.js"></script>
+    <script src="./norwegian-database.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
