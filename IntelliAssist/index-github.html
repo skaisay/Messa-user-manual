@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Веб-Ассистент</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Основной контейнер приложения -->
+    <div class="app-container">
+        <!-- Шапка чата -->
+        <header class="chat-header" id="chatHeader">
+            <div class="chat-title" id="chatTitle">Новый чат</div>
+            <button class="new-chat-btn" id="newChatBtn">
+                <i data-feather="edit-3"></i>
+            </button>
+        </header>
+
+        <!-- Основная область чата -->
+        <main class="chat-container">
+            <!-- Область сообщений -->
+            <div class="messages-container" id="messagesContainer">
+            </div>
+
+            <!-- Индикатор загрузки -->
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-dots">
+                    <div class="loading-message-avatar">
+                        <span class="loader"></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Область ввода -->
+        <footer class="input-container">
+            <form class="input-form" id="chatForm">
+                <div class="input-wrapper">
+                    <button type="button" class="attach-button" id="attachButton" aria-label="Прикрепить файл">
+                        <i data-feather="paperclip"></i>
+                    </button>
+                    <textarea 
+                        type="text" 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Спрашивай что угодно"
+                        autocomplete="off"
+                        maxlength="500"
+                    ></textarea>
+                    <button type="submit" class="send-button" id="sendButton" aria-label="Отправить сообщение">
+                        <i data-feather="send"></i>
+                    </button>
+                </div>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Подключение скриптов -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <script src="database.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
