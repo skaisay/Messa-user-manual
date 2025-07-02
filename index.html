@@ -63,21 +63,6 @@
         <main class="chat-container">
             <!-- Область сообщений -->
             <div class="messages-container" id="messagesContainer">
-                <!-- Приветственное сообщение -->
-                <div class="message assistant-message welcome-message">
-                    <div class="message-avatar">
-                        <div class="avatar-loader">
-                            <div class="avatar-inner">
-                                <div class="avatar-particle"></div>
-                                <div class="avatar-particle"></div>
-                                <div class="avatar-particle"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="message-content">
-                        <p>Привет! Я твой персональный ассистент для изучения норвежского языка. Могу помочь с переводами, грамматикой и новыми словами. Просто спроси что-нибудь!</p>
-                    </div>
-                </div>
             </div>
 
             <!-- Индикатор загрузки -->
@@ -92,17 +77,21 @@
 
         <!-- Область ввода -->
         <footer class="input-container">
-            <form class="input-form" id="chatForm">
+            <form class="input-form" id="inputForm">
                 <div class="input-wrapper">
+                    <!-- Левые кнопки удалены -->
+
+                    <!-- Поле ввода -->
                     <textarea 
-                        type="text" 
                         class="message-input" 
                         id="messageInput" 
                         placeholder="Спрашивай что угодно"
                         autocomplete="off"
-                        maxlength="500"
+                        rows="1"
                     ></textarea>
-                    <button type="submit" class="send-button" id="sendButton" aria-label="Отправить сообщение">
+
+                    <!-- Кнопка отправки -->
+                    <button type="submit" class="send-button" title="Отправить сообщение">
                         <i data-feather="send"></i>
                     </button>
                 </div>
@@ -111,8 +100,8 @@
     </div>
 
     <!-- Кастомное контекстное меню -->
-    <div class="custom-context-menu" id="customContextMenu">
-        <button class="context-menu-item" id="copyMenuItem">
+    <div id="customContextMenu" class="custom-context-menu">
+        <button class="context-menu-item" onclick="copyText()">
             <i data-feather="copy"></i>
             Копировать
         </button>
