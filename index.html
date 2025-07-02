@@ -23,10 +23,27 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Анимированный фон -->
+    <div class="animated-background">
+        <div class="particle" style="--x: 10%; --y: 20%; --duration: 8s; --delay: 0s;"></div>
+        <div class="particle" style="--x: 80%; --y: 10%; --duration: 12s; --delay: 2s;"></div>
+        <div class="particle" style="--x: 60%; --y: 80%; --duration: 10s; --delay: 4s;"></div>
+        <div class="particle" style="--x: 20%; --y: 60%; --duration: 15s; --delay: 1s;"></div>
+        <div class="particle" style="--x: 90%; --y: 70%; --duration: 9s; --delay: 3s;"></div>
+        <div class="particle" style="--x: 40%; --y: 30%; --duration: 11s; --delay: 5s;"></div>
+        <div class="particle" style="--x: 70%; --y: 50%; --duration: 13s; --delay: 2.5s;"></div>
+        <div class="particle" style="--x: 30%; --y: 90%; --duration: 14s; --delay: 1.5s;"></div>
+    </div>
+
     <!-- Основной контейнер приложения -->
     <div class="app-container">
         <!-- Шапка чата -->
         <header class="chat-header" id="chatHeader">
+            <div class="header-left">
+                <div class="wave-loader">
+                    <div class="waves"></div>
+                </div>
+            </div>
             <div class="chat-title" id="chatTitle">Новый чат</div>
             <button class="new-chat-btn" id="newChatBtn">
                 <i data-feather="edit-3"></i>
@@ -70,6 +87,14 @@
                 </div>
             </form>
         </footer>
+    </div>
+
+    <!-- Кастомное контекстное меню -->
+    <div class="custom-context-menu" id="customContextMenu">
+        <button class="context-menu-item" id="copyMenuItem">
+            <i data-feather="copy"></i>
+            Копировать
+        </button>
     </div>
 
     <!-- Подключение скриптов -->
