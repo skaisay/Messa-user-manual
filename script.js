@@ -39,7 +39,6 @@ class WebAssistant {
         this.speechRecognition = null;
         this.speechSynthesis = null;
         this.isListening = false;
-        this.voiceButton = null;
         
         // Инициализация
         this.init();
