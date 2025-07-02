@@ -22,9 +22,9 @@
     --input-border: #d0d7de;
 }
 
-/* Темная тема (по умолчанию) - теплый светло-синий фон */
+/* Темная тема (по умолчанию) - черный фон */
 [data-theme="dark"], :root {
-    --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-primary: #000000;
     --bg-secondary: rgba(255, 255, 255, 0.1);
     --bg-tertiary: rgba(255, 255, 255, 0.2);
     --text-primary: #ffffff;
