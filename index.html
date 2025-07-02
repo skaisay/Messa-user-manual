@@ -2,37 +2,46 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Веб-Ассистент</title>
     
-    <!-- PWA Meta теги -->
+    <!-- PWA манифест -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Мета-теги для PWA -->
     <meta name="theme-color" content="#000000">
-    <meta name="background-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Веб-Ассистент">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-tap-highlight" content="no">
     
-    <!-- Иконки и манифест -->
-    <link rel="manifest" href="./manifest.json">
+    <!-- Иконки для разных платформ -->
     <link rel="icon" type="image/svg+xml" href="./icon.svg">
     <link rel="apple-touch-icon" href="./icon.svg">
+    <link rel="mask-icon" href="./icon.svg" color="#000000">
     
-    <!-- Стили -->
     <link rel="stylesheet" href="./styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Анимированный фон -->
-    <div class="animated-background">
-        <div class="particle" style="--x: 10%; --y: 20%; --duration: 8s; --delay: 0s;"></div>
-        <div class="particle" style="--x: 80%; --y: 10%; --duration: 12s; --delay: 2s;"></div>
-        <div class="particle" style="--x: 60%; --y: 80%; --duration: 10s; --delay: 4s;"></div>
-        <div class="particle" style="--x: 20%; --y: 60%; --duration: 15s; --delay: 1s;"></div>
-        <div class="particle" style="--x: 90%; --y: 70%; --duration: 9s; --delay: 3s;"></div>
-        <div class="particle" style="--x: 40%; --y: 30%; --duration: 11s; --delay: 5s;"></div>
-        <div class="particle" style="--x: 70%; --y: 50%; --duration: 13s; --delay: 2.5s;"></div>
-        <div class="particle" style="--x: 30%; --y: 90%; --duration: 14s; --delay: 1.5s;"></div>
+    <div class="background-animation">
+        <div class="background-loader">
+            <div class="head"></div>
+            <div class="flames">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+            <div class="eye"></div>
+        </div>
     </div>
 
     <!-- Основной контейнер приложения -->
@@ -54,6 +63,21 @@
         <main class="chat-container">
             <!-- Область сообщений -->
             <div class="messages-container" id="messagesContainer">
+                <!-- Приветственное сообщение -->
+                <div class="message assistant-message welcome-message">
+                    <div class="message-avatar">
+                        <div class="avatar-loader">
+                            <div class="avatar-inner">
+                                <div class="avatar-particle"></div>
+                                <div class="avatar-particle"></div>
+                                <div class="avatar-particle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message-content">
+                        <p>Привет! Я твой персональный ассистент для изучения норвежского языка. Могу помочь с переводами, грамматикой и новыми словами. Просто спроси что-нибудь!</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Индикатор загрузки -->
@@ -70,9 +94,6 @@
         <footer class="input-container">
             <form class="input-form" id="chatForm">
                 <div class="input-wrapper">
-                    <button type="button" class="attach-button" id="attachButton" aria-label="Прикрепить файл">
-                        <i data-feather="paperclip"></i>
-                    </button>
                     <textarea 
                         type="text" 
                         class="message-input" 
