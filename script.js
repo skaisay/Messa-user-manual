@@ -18,6 +18,10 @@ class WebAssistant {
         // Состояние приложения
         this.isProcessing = false;
         this.messageHistory = [];
+        this.userProfile = {
+            name: localStorage.getItem('userName') || 'Пользователь',
+            avatar: localStorage.getItem('userAvatar') || 'anime1'
+        };
         this.firstMessage = true;
         
         // Состояние для контекстного меню
@@ -43,6 +47,7 @@ class WebAssistant {
         this.initializeFeatherIcons();
         this.initializeNorwegianEngine();
         this.initializePWA();
+        this.initializeProfile();
         
         // Фокус на поле ввода
         this.messageInput.focus();
@@ -727,6 +732,201 @@ class WebAssistant {
             assistantMessages: this.messageHistory.filter(m => m.type === 'assistant').length,
             sessionStart: this.messageHistory.length > 0 ? this.messageHistory[0].timestamp : Date.now()
         };
+    }
+
+    /**
+     * Инициализация профиля пользователя
+     */
+    initializeProfile() {
+        this.updateProfileDisplay();
+        this.bindProfileEvents();
+    }
+
+    /**
+     * Обновление отображения профиля
+     */
+    updateProfileDisplay() {
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const userAvatarPreview = document.getElementById('userAvatarPreview');
+        
+        if (userNameDisplay) {
+            userNameDisplay.textContent = this.userProfile.name;
+        }
+        
+        if (userAvatarPreview) {
+            this.setAvatarImage(userAvatarPreview, this.userProfile.avatar);
+        }
+    }
+
+    /**
+     * Привязка событий профиля
+     */
+    bindProfileEvents() {
+        // Кнопка меню
+        const menuButton = document.getElementById('menuButton');
+        const sideMenu = document.getElementById('sideMenu');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+        // Модальное окно профиля
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const profileModal = document.getElementById('profileModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // Открытие бокового меню
+        if (menuButton) {
+            menuButton.addEventListener('click', () => {
+                console.log('Меню кнопка нажата');
+                if (sideMenu) {
+                    sideMenu.classList.add('open');
+                    console.log('Меню открыто');
+                } else {
+                    console.log('Элемент sideMenu не найден');
+                }
+            });
+        } else {
+            console.log('Кнопка menuButton не найдена');
+        }
+
+        // Закрытие бокового меню
+        closeMenuBtn?.addEventListener('click', () => {
+            sideMenu?.classList.remove('open');
+        });
+
+        // Открытие модального окна профиля
+        editProfileBtn?.addEventListener('click', () => {
+            this.openProfileModal();
+        });
+
+        // Закрытие модального окна
+        [closeModalBtn, cancelBtn].forEach(element => {
+            element?.addEventListener('click', () => {
+                this.closeProfileModal();
+            });
+        });
+
+        // Закрытие по клику на overlay
+        modalOverlay?.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                this.closeProfileModal();
+            }
+        });
+
+        // Закрытие бокового меню по клику вне его
+        document.addEventListener('click', (e) => {
+            if (sideMenu?.classList.contains('open') && 
+                !sideMenu.contains(e.target) && 
+                !menuButton?.contains(e.target)) {
+                sideMenu.classList.remove('open');
+            }
+        });
+
+        // Сохранение профиля
+        saveBtn?.addEventListener('click', () => {
+            this.saveProfile();
+        });
+
+        // Выбор аватара
+        document.querySelectorAll('.avatar-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+    }
+
+    /**
+     * Открытие модального окна профиля
+     */
+    openProfileModal() {
+        const profileModal = document.getElementById('profileModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const userNameInput = document.getElementById('userName');
+        const sideMenu = document.getElementById('sideMenu');
+
+        // Закрываем боковое меню
+        sideMenu?.classList.remove('open');
+
+        // Заполняем форму текущими данными
+        if (userNameInput) {
+            userNameInput.value = this.userProfile.name;
+        }
+
+        // Выбираем текущий аватар
+        document.querySelectorAll('.avatar-option').forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.avatar === this.userProfile.avatar) {
+                option.classList.add('selected');
+            }
+        });
+
+        // Показываем модальное окно
+        modalOverlay?.classList.add('open');
+        profileModal?.classList.add('open');
+        
+        // Фокус на поле имени
+        setTimeout(() => userNameInput?.focus(), 100);
+    }
+
+    /**
+     * Закрытие модального окна профиля
+     */
+    closeProfileModal() {
+        const profileModal = document.getElementById('profileModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+
+        profileModal?.classList.remove('open');
+        modalOverlay?.classList.remove('open');
+    }
+
+    /**
+     * Сохранение профиля
+     */
+    saveProfile() {
+        const userNameInput = document.getElementById('userName');
+        const selectedAvatar = document.querySelector('.avatar-option.selected');
+
+        if (userNameInput && selectedAvatar) {
+            const newName = userNameInput.value.trim() || 'Пользователь';
+            const newAvatar = selectedAvatar.dataset.avatar;
+
+            // Обновляем профиль
+            this.userProfile.name = newName;
+            this.userProfile.avatar = newAvatar;
+
+            // Сохраняем в localStorage
+            localStorage.setItem('userName', newName);
+            localStorage.setItem('userAvatar', newAvatar);
+
+            // Обновляем отображение
+            this.updateProfileDisplay();
+
+            // Закрываем модальное окно
+            this.closeProfileModal();
+
+            console.log('Профиль сохранен:', this.userProfile);
+        }
+    }
+
+    /**
+     * Установка изображения аватара
+     */
+    setAvatarImage(element, avatarType) {
+        const avatarImages = {
+            character1: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23667eea'/><stop offset='100%' stop-color='%23764ba2'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g1)'/><circle cx='50' cy='35' r='12' fill='%23ffcc5c'/><circle cx='42' cy='32' r='2' fill='%23333'/><circle cx='58' cy='32' r='2' fill='%23333'/><path d='M40 42 Q50 48 60 42' stroke='%23333' stroke-width='2' fill='none'/><circle cx='50' cy='50' r='2' fill='%23ffcc5c'/><rect x='35' y='65' width='30' height='20' rx='5' fill='%23ff6b6b'/></svg>",
+            character2: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23ff9a9e'/><stop offset='100%' stop-color='%23fecfef'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g2)'/><ellipse cx='50' cy='35' rx='15' ry='12' fill='%23ffcc5c'/><circle cx='43' cy='32' r='2' fill='%23333'/><circle cx='57' cy='32' r='2' fill='%23333'/><path d='M43 40 Q50 44 57 40' stroke='%23333' stroke-width='2' fill='none'/><path d='M25 25 Q35 15 45 25' stroke='%23a0522d' stroke-width='3' fill='none'/><path d='M55 25 Q65 15 75 25' stroke='%23a0522d' stroke-width='3' fill='none'/><rect x='35' y='65' width='30' height='18' rx='5' fill='%234ecdc4'/></svg>",
+            cat: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a8e6cf'/><stop offset='100%' stop-color='%2388d8a3'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g3)'/><ellipse cx='50' cy='45' rx='18' ry='15' fill='%23ff8a80'/><polygon points='35,30 40,15 45,30' fill='%23ff8a80'/><polygon points='55,30 60,15 65,30' fill='%23ff8a80'/><circle cx='43' cy='40' r='2' fill='%23333'/><circle cx='57' cy='40' r='2' fill='%23333'/><ellipse cx='50' cy='48' rx='2' ry='1' fill='%23333'/><path d='M48 50 L50 52 L52 50' stroke='%23333' stroke-width='2' fill='none'/><path d='M40 52 Q50 55 60 52' stroke='%23333' stroke-width='1' fill='none'/></svg>",
+            robot: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g4' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2351e5ff'/><stop offset='100%' stop-color='%237c4dff'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g4)'/><rect x='35' y='30' width='30' height='25' rx='3' fill='%23e8eaf6'/><circle cx='42' cy='40' r='3' fill='%234fc3f7'/><circle cx='58' cy='40' r='3' fill='%234fc3f7'/><rect x='47' y='48' width='6' height='4' rx='1' fill='%23333'/><circle cx='50' cy='25' r='3' fill='%23ff5722'/><rect x='20' y='45' width='8' height='3' rx='1' fill='%23ff9800'/><rect x='72' y='45' width='8' height='3' rx='1' fill='%23ff9800'/><rect x='40' y='65' width='20' height='8' rx='2' fill='%23424242'/></svg>",
+            galaxy: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><radialGradient id='g5' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='%23667eea'/><stop offset='50%' stop-color='%234a00e0'/><stop offset='100%' stop-color='%23000'/></radialGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g5)'/><circle cx='30' cy='25' r='1' fill='%23fff'/><circle cx='70' cy='30' r='1.5' fill='%23fff'/><circle cx='25' cy='50' r='1' fill='%23fff'/><circle cx='75' cy='65' r='1' fill='%23fff'/><circle cx='60' cy='75' r='1.5' fill='%23fff'/><circle cx='40' cy='70' r='1' fill='%23fff'/><ellipse cx='50' cy='50' rx='20' ry='8' fill='none' stroke='%23ff6b9d' stroke-width='2' opacity='0.8'/><circle cx='50' cy='50' r='6' fill='%23ffd700'/></svg>",
+            gem: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g6' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23ff9a9e'/><stop offset='30%' stop-color='%23fecfef'/><stop offset='60%' stop-color='%23fecfef'/><stop offset='100%' stop-color='%23ff9a9e'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%23000'/><polygon points='50,20 30,40 35,65 50,75 65,65 70,40' fill='url(%23g6)'/><polygon points='50,20 40,35 50,45 60,35' fill='%23fff' opacity='0.7'/><polygon points='30,40 40,50 50,45 35,40' fill='%23fff' opacity='0.3'/><polygon points='70,40 60,50 50,45 65,40' fill='%23fff' opacity='0.3'/></svg>"
+        };
+
+        const img = element.querySelector('img');
+        if (img && avatarImages[avatarType]) {
+            img.src = avatarImages[avatarType];
+        }
     }
 }
 
